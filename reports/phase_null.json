@@ -1,0 +1,72 @@
+{
+  "n_clips": 120,
+  "per_trace": {
+    "Head off-centre": {
+      "mean": -0.0244,
+      "sd": 0.0851,
+      "n": 120
+    },
+    "Neck angle": {
+      "mean": -2.2461,
+      "sd": 11.0756,
+      "n": 120
+    },
+    "Hip drop": {
+      "mean": -2.657,
+      "sd": 10.7248,
+      "n": 120
+    },
+    "Leg extension": {
+      "mean": 0.0253,
+      "sd": 0.1826,
+      "n": 120
+    },
+    "Arm reach": {
+      "mean": 0.0132,
+      "sd": 0.1026,
+      "n": 120
+    },
+    "Lateral sway": {
+      "mean": -0.019,
+      "sd": 0.0478,
+      "n": 120
+    },
+    "Shoulder sway": {
+      "mean": -0.0226,
+      "sd": 0.0517,
+      "n": 120
+    },
+    "Trunk lean": {
+      "mean": -0.1261,
+      "sd": 7.1799,
+      "n": 120
+    },
+    "Arm reach L-R": {
+      "mean": -0.0635,
+      "sd": 0.1107,
+      "n": 120
+    },
+    "Shoulder tilt": {
+      "mean": 0.0245,
+      "sd": 10.9521,
+      "n": 120
+    },
+    "Knee lift": {
+      "mean": -0.0541,
+      "sd": 0.0818,
+      "n": 120
+    },
+    "Step width": {
+      "mean": -0.011,
+      "sd": 0.1176,
+      "n": 120
+    }
+  },
+  "validation": {
+    "clips": 150,
+    "family_wise_false_rate": 0.093,
+    "claims_per_clip": 0.26,
+    "multiplier": 3.5,
+    "note": "held-out constant-quality clips; the true phase change is zero by construction, so any reported change is spurious"
+  }
+}

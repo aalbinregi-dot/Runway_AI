@@ -1,0 +1,10 @@
+{
+  "fps": 50.0,
+  "source": "MoCap",
+  "subjects": 7,
+  "clips": 14,
+  "frames_per_clip": 200,
+  "duration_s": 4.0,
+  "landmarks": 13,
+  "notes": "Real motion-capture walking data. 7 subjects (S1,S5,S6,S7,S8,S9,S11), 14 clips. clip_info sheet contains reference kinematics (cadence_spm, step_time_std_s, wrist_x_amplitude, ankle_y_amplitude) for feature validation."
+}

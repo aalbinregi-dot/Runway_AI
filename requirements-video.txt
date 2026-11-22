@@ -1,0 +1,26 @@
+# Video-ingestion environment. Requires CPython 3.9-3.12 (MediaPipe does not
+# publish wheels for 3.13+). Create it alongside your main environment:
+#
+#   Windows        py -3.12 -m venv .venv312
+#                  .venv312\Scripts\pip install -r requirements-video.txt
+#
+#   macOS / Linux  python3.12 -m venv .venv312
+#                  .venv312/bin/pip install -r requirements-video.txt
+#
+# Or let the launcher do it: `run.bat setup` / `./run.sh setup`.
+#
+# On macOS this second environment is often unnecessary: Python 3.12 satisfies
+# both MediaPipe and the analysis pipeline, so one .venv holding both requirement
+# files does everything, and no delegation happens at all.
+#
+# The launcher detects .venv312 / .venv311 / .venv310 / .venv39 automatically and
+# routes video files to it, then scores the extracted keypoints back in the main
+# environment.
+#
+# Both MediaPipe API generations are supported by pose/extract.py:
+#   * 1.x  - the Tasks API (PoseLandmarker). Downloads a ~9 MB model on first use.
+#   * 0.10 - the legacy mp.solutions.pose API.
+mediapipe>=0.10.9
+opencv-python>=4.9
+numpy>=1.26
+pandas>=2.0

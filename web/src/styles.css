@@ -1,0 +1,2621 @@
+/* ==========================================================================
+   Runway AI — design system
+
+   Strictly monochrome. Score quality is encoded in *luminance and weight*
+   rather than hue: bright, heavy white reads as excellent, dim grey as poor.
+   That keeps the palette honest to the brief and, usefully, means the whole
+   interface still reads correctly for anyone with colour vision deficiency.
+
+   Glass panels sit on a slowly drifting light field. The blur is what makes
+   them read as glass rather than as flat translucent rectangles, so every
+   surface pairs backdrop-filter with a hairline top edge — the highlight a
+   real pane catches.
+   ========================================================================== */
+
+:root {
+  /* Ground: near-black, very slightly cool, so pure white type stays crisp
+     against it without the harshness of #000. */
+  --void: #08090b;
+  --void-2: #0d0f12;
+
+  /* Type */
+  --ink: #f6f5f3;          /* warm off-white — pure #fff glares on OLED */
+  --ink-2: rgba(246, 245, 243, 0.62);
+  --ink-3: rgba(246, 245, 243, 0.38);
+  --ink-4: rgba(246, 245, 243, 0.16);
+
+  /* Glass */
+  --glass: rgba(255, 255, 255, 0.062);
+  --glass-hi: rgba(255, 255, 255, 0.1);
+  --edge: rgba(255, 255, 255, 0.14);
+  --edge-hi: rgba(255, 255, 255, 0.22);
+
+  /* Type stacks. A high-contrast fashion serif for display, a neutral
+     grotesque for interface, tabular mono for figures. */
+  --display: "Bodoni MT", "Didot", "Playfair Display", "Times New Roman", serif;
+  --sans: "Helvetica Neue", "Segoe UI Variable Text", "Segoe UI", system-ui,
+          -apple-system, Arial, sans-serif;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+
+  --r: 18px;               /* panel radius */
+  --r-sm: 11px;
+  --pad: clamp(1.1rem, 4vw, 1.6rem);
+  --gap: clamp(0.85rem, 3vw, 1.15rem);
+  --shell: 1180px;
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--void);
+  color: var(--ink);
+  font: 400 16px/1.6 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* The light field the glass refracts. Fixed, so it never scrolls away and the
+   panels always have something to catch. */
+.field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(46vw 38vw at 12% 2%,  rgba(255,255,255,0.20), transparent 58%),
+    radial-gradient(40vw 34vw at 96% 16%, rgba(255,255,255,0.14), transparent 56%),
+    radial-gradient(58vw 44vw at 52% 108%, rgba(255,255,255,0.11), transparent 60%),
+    linear-gradient(178deg, #14171b, var(--void) 62%);
+  animation: drift 34s ease-in-out infinite alternate;
+}
+.field::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 40%, rgba(0,0,0,0.62));
+}
+.field::after {
+  /* Film grain. Without it the large gradients band visibly on 8-bit panels. */
+  content: "";
+  position: absolute;
+  inset: -50%;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@keyframes drift {
+  from { transform: translate3d(-1.5%, -1%, 0) scale(1.04); }
+  to   { transform: translate3d(1.5%, 1.5%, 0) scale(1.1); }
+}
+
+/* --------------------------------------------------------------------------
+   Glass
+   -------------------------------------------------------------------------- */
+.glass {
+  position: relative;
+  background: var(--glass);
+  border: 1px solid var(--edge);
+  border-radius: var(--r);
+  backdrop-filter: blur(26px) saturate(150%);
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,0.06) inset,
+    0 24px 60px -30px rgba(0,0,0,0.9);
+}
+/* The specular top edge that makes a pane read as glass. */
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  border-radius: var(--r) var(--r) 0 0;
+  background: linear-gradient(90deg, transparent, var(--edge-hi) 22%,
+                              var(--edge-hi) 78%, transparent);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Shell
+   -------------------------------------------------------------------------- */
+.shell {
+  position: relative;
+  z-index: 1;
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: clamp(1rem, 3.5vw, 2rem) var(--pad) 5rem;
+}
+
+header.top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0 clamp(1.2rem, 4vw, 2rem);
+  flex-wrap: wrap;
+}
+.wordmark {
+  font: 400 clamp(1.35rem, 4.6vw, 1.9rem)/1 var(--display);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.wordmark span { font-style: italic; letter-spacing: 0.04em; text-transform: none; }
+.tagline {
+  font: 500 0.6rem/1 var(--mono);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* --------------------------------------------------------------------------
+   Tabs
+   -------------------------------------------------------------------------- */
+.tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--glass);
+  border: 1px solid var(--edge);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  margin-bottom: var(--gap);
+}
+.tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-3);
+  font: 500 0.66rem/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.62rem 1.05rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.25s, background 0.25s;
+}
+.tab[aria-selected="true"] { background: var(--ink); color: var(--void); }
+.tab:hover:not([aria-selected="true"]) { color: var(--ink); }
+
+/* --------------------------------------------------------------------------
+   Drop zone
+   -------------------------------------------------------------------------- */
+.drop-wrap {
+  max-width: 44rem;
+  margin: 0 auto;
+}
+@media (min-width: 900px) {
+  .drop-wrap { margin-top: clamp(1rem, 6vh, 4rem); }
+}
+.drop {
+  display: grid;
+  place-items: center;
+  gap: 0.85rem;
+  padding: clamp(2.2rem, 9vw, 4rem) var(--pad);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.3s, background 0.3s, transform 0.3s;
+}
+.drop.over { border-color: var(--edge-hi); background: var(--glass-hi); transform: scale(1.006); }
+.drop h2 {
+  margin: 0;
+  font: 400 clamp(1.3rem, 4.6vw, 1.85rem)/1.25 var(--display);
+  letter-spacing: 0.01em;
+}
+.drop p { margin: 0; color: var(--ink-3); font-size: 0.86rem; max-width: 34ch; }
+.ring {
+  width: 54px; height: 54px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--edge-hi);
+  color: var(--ink-2);
+}
+.filetypes {
+  font: 500 0.58rem/1 var(--mono);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+/* --------------------------------------------------------------------------
+   Score hero
+   -------------------------------------------------------------------------- */
+.hero { padding: clamp(1.4rem, 5vw, 2.2rem) var(--pad); }
+.hero-grid {
+  display: grid;
+  gap: clamp(1rem, 4vw, 2rem);
+  grid-template-columns: 1fr;
+  align-items: center;
+}
+@media (min-width: 720px) { .hero-grid { grid-template-columns: auto 1fr; } }
+
+.numeral {
+  font: 400 clamp(5rem, 21vw, 8.5rem)/0.82 var(--display);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+.numeral small {
+  font: 500 0.62rem/1 var(--mono);
+  letter-spacing: 0.2em;
+  color: var(--ink-3);
+  margin-top: 0.9rem;
+}
+.grade {
+  font: italic 400 clamp(1.2rem, 4.4vw, 1.65rem)/1.2 var(--display);
+  letter-spacing: 0.02em;
+  margin: 0 0 0.35rem;
+}
+.meta {
+  font: 500 0.6rem/1.7 var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* --------------------------------------------------------------------------
+   Criterion rows — luminance encodes quality
+   -------------------------------------------------------------------------- */
+.rows { display: grid; gap: 1px; }
+.row {
+  display: grid;
+  grid-template-columns: 1fr 2.6rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.72rem 0;
+  border-bottom: 1px solid var(--ink-4);
+}
+.row:last-child { border-bottom: 0; }
+.row .name { font-size: 0.9rem; letter-spacing: 0.005em; }
+.row .val {
+  font: 500 0.95rem/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.track {
+  grid-column: 1 / -1;
+  height: 2px;
+  background: var(--ink-4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.track i {
+  display: block;
+  height: 100%;
+  background: currentColor;
+  border-radius: 2px;
+  transform-origin: left;
+  animation: grow 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Quality tiers, by luminance only. */
+.q-1 { color: rgba(246,245,243,1);    }
+.q-2 { color: rgba(246,245,243,0.72); }
+.q-3 { color: rgba(246,245,243,0.44); }
+.q-4 { color: rgba(246,245,243,0.26); }
+.row.q-1 .name { font-weight: 500; }
+.row.q-4 .name { color: var(--ink-2); }
+
+/* --------------------------------------------------------------------------
+   Cards, focus areas, drills
+   -------------------------------------------------------------------------- */
+.card { padding: var(--pad); }
+.card + .card { margin-top: var(--gap); }
+.card h3 {
+  margin: 0 0 1rem;
+  font: 500 0.62rem/1 var(--mono);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.focus { display: grid; gap: 0.9rem; }
+.focus-item {
+  display: grid;
+  grid-template-columns: 2.1rem 1fr;
+  gap: 0.85rem;
+  padding: 0.95rem;
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.028);
+  border: 1px solid var(--ink-4);
+}
+.rank {
+  font: 400 1.4rem/1 var(--display);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+}
+.focus-item h4 { margin: 0 0 0.3rem; font-size: 0.95rem; font-weight: 500; }
+.focus-item p { margin: 0; font-size: 0.87rem; color: var(--ink-2); }
+.measure {
+  margin-top: 0.5rem;
+  font: 500 0.66rem/1.5 var(--mono);
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  word-break: break-word;
+}
+
+.drill { padding: 0.85rem 0; border-bottom: 1px solid var(--ink-4); }
+.drill:last-child { border-bottom: 0; }
+.drill b { font-weight: 500; }
+.drill .for {
+  font: 500 0.58rem/1 var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  display: block;
+  margin-bottom: 0.3rem;
+}
+.drill p { margin: 0.3rem 0 0; font-size: 0.87rem; color: var(--ink-2); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.chip {
+  font: 500 0.62rem/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--edge);
+  color: var(--ink-2);
+}
+
+/* --------------------------------------------------------------------------
+   Notices
+   -------------------------------------------------------------------------- */
+.notice {
+  display: flex;
+  gap: 0.7rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--edge);
+  border-left: 2px solid var(--ink-2);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.85rem;
+  color: var(--ink-2);
+}
+.notice + .notice { margin-top: 0.5rem; }
+.notice svg { flex: none; margin-top: 0.15rem; opacity: 0.5; }
+
+/* --------------------------------------------------------------------------
+   Buttons & inputs
+   -------------------------------------------------------------------------- */
+.btn {
+  appearance: none;
+  cursor: pointer;
+  font: 500 0.64rem/1 var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.85rem 1.3rem;
+  border-radius: 999px;
+  border: 1px solid var(--edge-hi);
+  background: transparent;
+  color: var(--ink);
+  transition: background 0.25s, color 0.25s, border-color 0.25s;
+}
+.btn:hover { background: var(--ink); color: var(--void); border-color: var(--ink); }
+.btn.solid { background: var(--ink); color: var(--void); border-color: var(--ink); }
+.btn.solid:hover { background: transparent; color: var(--ink); border-color: var(--edge-hi); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+
+.field-input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--edge);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ink);
+  font: 400 0.92rem var(--sans);
+}
+.field-input::placeholder { color: var(--ink-3); }
+.field-input:focus { outline: none; border-color: var(--edge-hi); }
+
+label.lab {
+  display: block;
+  font: 500 0.58rem/1 var(--mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 0.45rem;
+}
+
+/* --------------------------------------------------------------------------
+   Progress view
+   -------------------------------------------------------------------------- */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: 1px;
+  background: var(--ink-4);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+.stat { background: rgba(255,255,255,0.028); padding: 1rem; }
+.stat dt {
+  font: 500 0.56rem/1 var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 0.5rem;
+}
+.stat dd {
+  margin: 0;
+  font: 400 1.6rem/1 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.delta { display: grid; gap: 0.5rem; }
+.delta-row {
+  display: grid;
+  grid-template-columns: 1fr 3.5rem;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.85rem;
+}
+.delta-bar { grid-column: 1 / -1; height: 2px; background: var(--ink-4); position: relative; }
+.delta-bar i { position: absolute; top: 0; height: 100%; background: var(--ink-2); }
+
+/* --------------------------------------------------------------------------
+   Loading
+   -------------------------------------------------------------------------- */
+.loading { display: grid; place-items: center; gap: 1.1rem; padding: 3.5rem var(--pad); text-align: center; }
+.pulse {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--edge-hi);
+  border-top-color: var(--ink);
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading p { margin: 0; color: var(--ink-3); font: 500 0.62rem/1.7 var(--mono);
+             letter-spacing: 0.18em; text-transform: uppercase; }
+
+.split { display: grid; gap: var(--gap); }
+@media (min-width: 900px) { .split { grid-template-columns: 1.15fr 1fr; align-items: start; } }
+
+footer.foot {
+  margin-top: 2.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--ink-4);
+  font: 500 0.58rem/1.8 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   Accessibility & platform
+   -------------------------------------------------------------------------- */
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* backdrop-filter is unsupported on some older mobile browsers; without this
+   the panels would render as barely-visible 4%-opacity rectangles. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass, .tabs { background: rgba(22, 24, 28, 0.92); }
+}
+
+@media (max-width: 480px) {
+  .row { grid-template-columns: 1fr 2.4rem; }
+  .focus-item { grid-template-columns: 1.6rem 1fr; gap: 0.6rem; }
+}
+
+/* Clip picker — a chip that is also a control, so it needs affordance. */
+.clip-pick {
+  appearance: none;
+  cursor: pointer;
+  background: transparent;
+  font-family: var(--mono);
+  transition: background 0.22s, color 0.22s, border-color 0.22s;
+}
+.clip-pick:hover { border-color: var(--edge-hi); color: var(--ink); }
+.clip-pick.on { background: var(--ink); color: var(--void); border-color: var(--ink); }
+
+/* --------------------------------------------------------------------------
+   Link input — the "or paste a link" path beside the drop zone
+   -------------------------------------------------------------------------- */
+.or {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.9rem;
+  margin: var(--gap) 0;
+  font: 500 0.58rem/1 var(--mono);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+.or::before, .or::after { content: ""; height: 1px; background: var(--ink-4); }
+
+.link-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.link-row .field-input { flex: 1 1 14rem; min-width: 0; }
+.link-hosts {
+  margin-top: 0.75rem;
+  font: 500 0.58rem/1.8 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+/* --------------------------------------------------------------------------
+   Processing view
+   -------------------------------------------------------------------------- */
+.proc { max-width: 44rem; margin: 0 auto; }
+.proc-head { display: flex; align-items: baseline; justify-content: space-between; }
+.proc-head h3 { margin: 0; }
+.proc-time {
+  font: 500 0.7rem/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+}
+.proc-file {
+  margin: 0.5rem 0 1.3rem;
+  font-size: 0.82rem;
+  color: var(--ink-3);
+  overflow-wrap: anywhere;
+}
+
+.proc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.2rem; }
+.proc-step {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr;
+  gap: 0.75rem;
+  padding: 0.7rem 0;
+  opacity: 0.34;
+  transition: opacity 0.35s;
+}
+.proc-step.active, .proc-step.done { opacity: 1; }
+
+.proc-dot {
+  width: 1.5rem; height: 1.5rem;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--edge);
+  color: var(--void);
+  margin-top: 0.1rem;
+}
+.proc-step.done .proc-dot { background: var(--ink); border-color: var(--ink); }
+.proc-step.active .proc-dot { border-color: var(--edge-hi); }
+.proc-spin {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  border: 1px solid var(--ink-4);
+  border-top-color: var(--ink);
+  animation: spin 0.75s linear infinite;
+}
+
+.proc-row { display: flex; align-items: baseline; justify-content: space-between; gap: 0.7rem; }
+.proc-label { font-size: 0.94rem; font-weight: 500; }
+.proc-count {
+  font: 500 0.68rem/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.proc-detail { margin: 0.25rem 0 0; font-size: 0.8rem; color: var(--ink-3); }
+
+.proc-bar {
+  margin-top: 0.6rem;
+  height: 2px;
+  background: var(--ink-4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.proc-bar i {
+  display: block; height: 100%;
+  background: var(--ink);
+  border-radius: 2px;
+  transition: width 0.3s ease-out;
+}
+/* Decoding has no known frame count yet, so the bar must not imply one. */
+.proc-bar.indet i {
+  width: 34%;
+  animation: sweep 1.3s ease-in-out infinite;
+}
+@keyframes sweep {
+  0%   { transform: translateX(-110%); }
+  100% { transform: translateX(330%); }
+}
+
+/* --------------------------------------------------------------------------
+   Home page animated skeleton loader
+   -------------------------------------------------------------------------- */
+.home-loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 480px;
+  padding: 2rem 1rem;
+}
+
+.home-loader-card {
+  position: relative;
+  background: rgba(13, 16, 23, 0.78);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid var(--edge);
+  border-top-color: var(--edge-hi);
+  border-radius: var(--r);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.7), 0 0 50px rgba(245, 132, 31, 0.08);
+  padding: 2.4rem 2rem;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 1.4rem;
+}
+
+.hl-stage {
+  position: relative;
+  width: min(240px, 72vw);
+  aspect-ratio: 1;
+}
+
+.hl-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.hl-ring-track {
+  fill: rgba(18, 22, 32, 0.6);
+  stroke: var(--edge);
+  stroke-width: 2;
+}
+
+.hl-ring-spin {
+  fill: none;
+  stroke: #f5841f;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-dasharray: 90 480;
+  transform-origin: 100px 100px;
+  animation: hl-spin 1.6s linear infinite;
+}
+
+.hl-ring-dots {
+  fill: none;
+  stroke: #f5841f;
+  stroke-opacity: 0.35;
+  stroke-width: 1.5;
+  stroke-dasharray: 1 9;
+  transform-origin: 100px 100px;
+  animation: hl-spin 14s linear infinite reverse;
+}
+
+.hl-glow {
+  fill: #f5841f;
+  opacity: 0.12;
+}
+
+.hl-floor {
+  stroke: #f5841f;
+  stroke-opacity: 0.55;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.hl-bone {
+  stroke: var(--ink);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+}
+
+.hl-joint {
+  fill: #f5841f;
+}
+
+.hl-head {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3.2;
+}
+
+.hl-content {
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  gap: 0.65rem;
+}
+
+.hl-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.hl-step {
+  margin: 0;
+  min-height: 1.4em;
+  color: var(--ink-2);
+  font-size: 0.92rem;
+}
+
+.hl-bar {
+  width: 100%;
+  max-width: 260px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ink-4);
+  overflow: hidden;
+  margin-top: 0.25rem;
+}
+
+.hl-bar-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: #f5841f;
+  box-shadow: 0 0 10px rgba(245, 132, 31, 0.5);
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+.hl-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  color: var(--ink-3);
+  font-family: var(--mono);
+}
+
+.hl-file {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hl-time {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+}
+
+@keyframes hl-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hl-ring-spin,
+  .hl-ring-dots {
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Skeleton player
+   -------------------------------------------------------------------------- */
+.player {
+  position: relative;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: #000;
+  line-height: 0;
+}
+.player video {
+  width: 100%;
+  max-height: 62vh;
+  object-fit: contain;
+  display: block;
+  cursor: pointer;
+}
+.player canvas { position: absolute; inset: 0; pointer-events: none; }
+.player-play {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 56px; height: 56px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(10,10,12,0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--ink);
+  cursor: pointer;
+}
+.player-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+.player-note {
+  font: 500 0.6rem/1.5 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+/* --------------------------------------------------------------------------
+   Timeline / evidence strip
+   -------------------------------------------------------------------------- */
+.tl { margin-top: 1rem; }
+.tl-tabs { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.7rem; }
+.tl-tab {
+  appearance: none; cursor: pointer;
+  font: 500 0.57rem/1 var(--mono);
+  letter-spacing: 0.09em; text-transform: uppercase;
+  padding: 0.4rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--ink-4);
+  background: transparent; color: var(--ink-3);
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.tl-tab:hover { color: var(--ink); border-color: var(--edge); }
+.tl-tab.on { background: var(--ink); color: var(--void); border-color: var(--ink); }
+
+.tl-plot {
+  position: relative;
+  height: 62px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--ink-4);
+  background: rgba(255, 255, 255, 0.022);
+  overflow: hidden;
+  cursor: crosshair;
+}
+.tl-plot svg { width: 100%; height: 100%; display: block; }
+
+/* Cycle boundaries — the segmentation the timing scores are built on. */
+.tl-cycle {
+  position: absolute; top: 0; bottom: 0; width: 1px;
+  background: rgba(246, 245, 243, 0.18);
+}
+.tl-head {
+  position: absolute; top: 0; bottom: 0; width: 1px;
+  background: var(--ink);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+}
+
+.tl-feet { display: grid; gap: 0.25rem; margin-top: 0.5rem; }
+.tl-foot { display: grid; grid-template-columns: 1.1rem 1fr; align-items: center; gap: 0.4rem; }
+.tl-foot-label {
+  font: 500 0.55rem/1 var(--mono);
+  color: var(--ink-4);
+  text-align: center;
+}
+.tl-foot-track {
+  position: relative; height: 12px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.tl-strike {
+  position: absolute; top: 2px; bottom: 2px; width: 2px;
+  border-radius: 2px;
+  transform: translateX(-1px);
+}
+.tl-strike.left { background: #f0844c; }
+.tl-strike.right { background: #4ea8de; }
+
+.tl-legend {
+  display: flex; flex-wrap: wrap; gap: 0.9rem;
+  margin-top: 0.6rem;
+  font: 500 0.55rem/1.6 var(--mono);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+/* A focus area that can be jumped to becomes a control. */
+.focus-item.seekable { cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+.focus-item.seekable:hover { border-color: var(--edge); background: rgba(255,255,255,0.05); }
+.seek-hint {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  margin-top: 0.5rem;
+  font: 500 0.58rem/1 var(--mono);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+
+/* ==========================================================================
+   Multi-page shell
+   ========================================================================== */
+
+/* Room for the mobile bar, plus the iOS home indicator. */
+.shell { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+@media (min-width: 760px) { .shell { padding-bottom: 5rem; } }
+
+.wordmark-link { text-decoration: none; color: inherit; }
+
+.nav-desktop { display: none; gap: 0.35rem; }
+@media (min-width: 760px) { .nav-desktop { display: flex; } }
+.nav-link {
+  text-decoration: none;
+  color: var(--ink-3);
+  font: 500 0.64rem/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.6rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+.nav-link:hover { color: var(--ink); }
+.nav-link.on { background: var(--ink); color: var(--void); }
+
+/* Mobile: a bottom bar, where thumbs are. Eight sections cannot fit a pill
+   row on a 390px phone, so the nav changes shape rather than shrinking. */
+.nav-mobile {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 20;
+  display: flex;
+  justify-content: space-around;
+  gap: 0.15rem;
+  padding: 0.5rem 0.4rem calc(0.5rem + env(safe-area-inset-bottom));
+  background: rgba(12, 14, 17, 0.82);
+  border-top: 1px solid var(--edge);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+@media (min-width: 760px) { .nav-mobile { display: none; } }
+.nav-item {
+  flex: 1 1 0;
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.1rem;
+  text-decoration: none;
+  color: var(--ink-4);
+  font: 500 0.53rem/1 var(--mono);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  border-radius: var(--r-sm);
+  transition: color 0.2s;
+}
+.nav-item.on { color: var(--ink); }
+
+.foot-link {
+  color: var(--ink-4);
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink-4);
+}
+.foot-link:hover { color: var(--ink-2); }
+
+/* --------------------------------------------------------------------------
+   History list
+   -------------------------------------------------------------------------- */
+.walks { display: grid; gap: 1px; }
+.walk {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--ink-4);
+}
+.walk:last-child { border-bottom: 0; }
+.walk.on { background: rgba(255, 255, 255, 0.045); }
+.walk-pick {
+  width: 1.5rem; height: 1.5rem;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--edge);
+  background: transparent;
+  color: var(--void);
+  cursor: pointer;
+  font-size: 0.7rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.walk.on .walk-pick { background: var(--ink); border-color: var(--ink); }
+.walk-main {
+  display: flex; align-items: baseline; gap: 0.7rem;
+  text-decoration: none; color: inherit; min-width: 0;
+}
+.walk-score {
+  font: 400 1.35rem/1 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.walk-meta {
+  font: 500 0.58rem/1.4 var(--mono);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  overflow-wrap: anywhere;
+}
+
+/* --------------------------------------------------------------------------
+   Compare
+   -------------------------------------------------------------------------- */
+.cmp-head { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
+.cmp-side { display: grid; justify-items: center; gap: 0.2rem; text-align: center; }
+.cmp-when {
+  font: 500 0.55rem/1 var(--mono);
+  letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-3);
+}
+.cmp-score {
+  font: 400 clamp(1.9rem, 8vw, 2.7rem)/1 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.cmp-grade { font: italic 400 0.85rem/1.2 var(--display); color: var(--ink-2); }
+.cmp-delta {
+  margin-top: 0.9rem; text-align: center;
+  font: 500 0.65rem/1 var(--mono);
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-2);
+}
+.cmp-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+}
+.cmp-nums, .cmp-diff {
+  font: 500 0.72rem/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.cmp-arrow { color: var(--ink-4); }
+.cmp-diff { min-width: 2.6rem; text-align: right; }
+
+/* --------------------------------------------------------------------------
+   Skeleton replay (no video kept)
+   -------------------------------------------------------------------------- */
+.figure {
+  width: 100%;
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.022);
+  border: 1px solid var(--ink-4);
+  cursor: pointer;
+  overflow: hidden;
+}
+.figure-empty {
+  display: grid; place-items: center;
+  border-radius: var(--r-sm);
+  border: 1px dashed var(--ink-4);
+  font: 500 0.55rem/1 var(--mono);
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-4);
+}
+
+/* --------------------------------------------------------------------------
+   Live coaching
+   -------------------------------------------------------------------------- */
+.live-overlay {
+  position: absolute; inset: 0;
+  display: grid; place-content: center; justify-items: center; gap: 0.9rem;
+  background: rgba(8, 9, 11, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  text-align: center;
+  padding: var(--pad);
+}
+.live-overlay p {
+  margin: 0; max-width: 26ch;
+  font: 500 0.6rem/1.7 var(--mono);
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
+}
+
+.cues { display: grid; gap: 0.95rem; }
+.cue { padding-bottom: 0.2rem; }
+.cue-row { display: flex; justify-content: space-between; align-items: baseline; gap: 0.7rem; }
+.cue-label { font-size: 0.92rem; }
+.cue-state {
+  font: 500 0.55rem/1 var(--mono);
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-4);
+}
+.cue.off .cue-state { color: var(--ink); }
+.cue-bar {
+  position: relative;
+  margin-top: 0.45rem;
+  height: 3px;
+  background: var(--ink-4);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.cue-bar i {
+  display: block; height: 100%;
+  background: rgba(246, 245, 243, 0.42);
+  border-radius: 3px;
+  transition: width 0.18s linear;
+}
+.cue.off .cue-bar i { background: var(--ink); }
+/* The target edge, so a value has somewhere to be read against. */
+.cue-mark {
+  position: absolute; top: -2px; bottom: -2px; width: 1px;
+  background: var(--ink-2);
+}
+.cue-hint { margin: 0.4rem 0 0; font-size: 0.8rem; color: var(--ink-2); }
+
+.live-caveat {
+  margin: 1.1rem 0 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--ink-4);
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: var(--ink-3);
+}
+
+/* A difference inside the model's own error is shown, but not emphasised. */
+.cmp-diff.weak { color: var(--ink-4); }
+.cmp-delta.weak { color: var(--ink-3); }
+.cmp-noise { text-transform: none; letter-spacing: 0.02em; color: var(--ink-4); }
+
+/* --------------------------------------------------------------------------
+   Gaze — measured facial geometry, shown as measurement not score
+   -------------------------------------------------------------------------- */
+.gaze {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: 1.1rem;
+}
+.gaze-stat { display: grid; gap: 0.25rem; }
+.gaze-num {
+  font: 400 clamp(1.5rem, 6vw, 2rem)/1 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.gaze-lab {
+  font: 500 0.55rem/1.3 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.gaze-bar {
+  margin-top: 0.3rem;
+  height: 2px;
+  background: var(--ink-4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.gaze-bar i { display: block; height: 100%; background: var(--ink); border-radius: 2px; }
+/* Dimmed rather than coloured: the palette is monochrome, and "more" is the
+   fault here, so a bright bar would read as an achievement. */
+.gaze-bar i.bad { background: var(--ink-3); }
+.gaze-note {
+  margin: 1rem 0 0;
+  font-size: 0.87rem;
+  color: var(--ink-2);
+}
+
+/* --------------------------------------------------------------------------
+   Camera angle
+   -------------------------------------------------------------------------- */
+.vp-scale { margin: 0.2rem 0 0.9rem; }
+.vp-track {
+  position: relative;
+  height: 3px;
+  background: var(--ink-4);
+  border-radius: 3px;
+}
+/* The shaded span is the estimator's uncertainty, drawn rather than described:
+   a single tick would imply precision the method does not have. */
+.vp-range {
+  position: absolute; top: 0; bottom: 0;
+  background: rgba(246, 245, 243, 0.28);
+  border-radius: 3px;
+}
+.vp-mark {
+  position: absolute; top: -4px; bottom: -4px; width: 2px;
+  background: var(--ink);
+  transform: translateX(-1px);
+}
+.vp-ticks {
+  display: flex; justify-content: space-between;
+  margin-top: 0.45rem;
+  font: 500 0.53rem/1 var(--mono);
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-4);
+}
+.vp-read { margin: 0 0 1rem; font-size: 0.95rem; }
+.vp-pm { color: var(--ink-3); font-size: 0.85rem; }
+.vp-cols { display: grid; gap: 0.9rem; }
+@media (min-width: 620px) { .vp-cols { grid-template-columns: 1fr 1fr; } }
+.vp-h {
+  display: block;
+  font: 500 0.55rem/1 var(--mono);
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3);
+  margin-bottom: 0.4rem;
+}
+.vp-cols p { margin: 0; font-size: 0.85rem; color: var(--ink-2); }
+
+/* --------------------------------------------------------------------------
+   Group analysis
+   -------------------------------------------------------------------------- */
+.page-head { margin-bottom: var(--gap); }
+.page-head h1 {
+  margin: 0 0 0.4rem;
+  font: 400 1.8rem/1.1 var(--display);
+  letter-spacing: -0.01em;
+}
+.page-head p { margin: 0; max-width: 56ch; font-size: 0.88rem; }
+
+.card.tight { padding: 1rem var(--pad); }
+.lede { margin: 0; font-size: 0.95rem; }
+.tiny { font-size: 0.66rem; letter-spacing: 0.04em; }
+
+.person-grid {
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-bottom: var(--gap);
+}
+/* A card is a button: the whole thing selects a walker, so it must reset the
+   UA button styling rather than inherit centred, clipped text. */
+.person-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+.person-card + .person-card { margin-top: 0; }
+.person-card:hover { border-color: var(--edge-hi); transform: translateY(-2px); }
+.person-card.selected {
+  border-color: var(--ink);
+  background: var(--glass-hi);
+}
+.person-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+.person-rank {
+  font: 400 1.5rem/1 var(--display);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+  min-width: 1.2ch;
+}
+.person-id { display: grid; gap: 0.25rem; min-width: 0; }
+.person-id strong {
+  font-weight: 500;
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.person-id .chip { justify-self: start; }
+.person-score { text-align: right; display: grid; gap: 0.15rem; }
+.person-num {
+  font: 400 1.6rem/1 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.person-extremes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin: 0.9rem 0 0;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--ink-4);
+}
+.person-extremes dt {
+  font: 500 0.58rem/1 var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 0.3rem;
+}
+.person-extremes dd { margin: 0; font-size: 0.82rem; }
+
+/* The matrix can outgrow a phone; it scrolls inside its own box so the page
+   body never scrolls sideways. */
+.matrix-scroll { overflow-x: auto; margin: 0 calc(var(--pad) * -1); padding: 0 var(--pad); }
+.matrix { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.matrix th, .matrix td { padding: 0.5rem 0.6rem; text-align: left; }
+.matrix thead th {
+  font: 500 0.58rem/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  border-bottom: 1px solid var(--ink-4);
+  white-space: nowrap;
+}
+.matrix tbody th { font-weight: 400; color: var(--ink-2); white-space: nowrap; }
+.matrix tbody tr + tr th, .matrix tbody tr + tr td { border-top: 1px solid var(--ink-4); }
+.matrix td.lead .bar-num { color: var(--ink); font-weight: 500; }
+.bar-wrap {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 96px;
+}
+.bar {
+  height: 3px;
+  border-radius: 2px;
+  background: currentColor;
+  transform-origin: left;
+  animation: grow 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.bar-num { font-variant-numeric: tabular-nums; color: var(--ink-2); font-size: 0.74rem; }
+
+.tips { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.45rem; }
+.tips li { font-size: 0.84rem; color: var(--ink-2); }
+
+@media (max-width: 560px) {
+  .person-grid { grid-template-columns: 1fr; }
+  .page-head h1 { font-size: 1.5rem; }
+}
+
+/* --------------------------------------------------------------------------
+   Drill tracking
+   -------------------------------------------------------------------------- */
+.btn.small { padding: 0.4rem 0.8rem; font-size: 0.72rem; margin-top: 0.6rem; }
+
+.drill-tracked {
+  margin: 0.7rem 0 0;
+  font-size: 0.76rem;
+  color: var(--ink-2);
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--ink-4);
+}
+.drill-tracked a { color: var(--ink); }
+
+.drill-card + .drill-card { margin-top: var(--gap); }
+.drill-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+/* `.card h3` is (class + element) and wins over a bare class, so the drill
+   title inherited the uppercase micro-label styling and collided with the chip
+   above it. Matching that specificity is what makes this a real heading. */
+.card h3.drill-name {
+  margin: 0.45rem 0 0;
+  font: 500 1.05rem/1.3 var(--sans);
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--ink);
+}
+.drill-count { text-align: right; display: grid; gap: 0.1rem; flex-shrink: 0; }
+.drill-num {
+  font: 400 1.5rem/1 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.drill-how { margin: 0 0 0.35rem; font-size: 0.86rem; color: var(--ink-2); }
+
+/* The verdict block. Colour is luminance only, in keeping with the palette —
+   the words carry the meaning, the shade only ranks it. */
+.outcome {
+  margin: 0.9rem 0;
+  padding: 0.85rem 0.95rem;
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.028);
+  border: 1px solid var(--ink-4);
+  border-left-width: 2px;
+}
+.outcome.good { border-left-color: rgba(246, 245, 243, 0.95); }
+.outcome.flat { border-left-color: rgba(246, 245, 243, 0.42); }
+.outcome.bad  { border-left-color: rgba(246, 245, 243, 0.68); }
+.outcome.wait { border-left-color: rgba(246, 245, 243, 0.2); }
+.outcome-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.35rem;
+}
+.outcome-head strong { font-size: 0.9rem; font-weight: 500; }
+.outcome-delta {
+  font: 400 1.15rem/1 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.outcome p { margin: 0.3rem 0 0; }
+.outcome a { color: var(--ink); }
+
+.drill-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.9rem; }
+.drill-actions .btn { margin-top: 0; }
+
+.past-drills { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
+.past-drills li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--ink-4);
+  font-size: 0.84rem;
+}
+.past-drills li:last-child { border-bottom: 0; padding-bottom: 0; }
+
+/* Seven sections no longer fit as evenly-spread mobile tabs; let them scroll. */
+@media (max-width: 560px) {
+  .nav-mobile { overflow-x: auto; scrollbar-width: none; }
+  .nav-mobile::-webkit-scrollbar { display: none; }
+  .nav-mobile .nav-item { flex: 0 0 auto; min-width: 4.4rem; }
+}
+
+/* --------------------------------------------------------------------------
+   Identifiability markers
+   -------------------------------------------------------------------------- */
+.ident {
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--ink-4);
+  border-radius: 999px;
+  font: 500 0.56rem/1.5 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  cursor: help;
+  white-space: nowrap;
+}
+.ident.moderate { color: var(--ink-3); }
+.ident.weak { color: var(--ink-3); border-style: dashed; }
+.row .name { display: inline-flex; align-items: center; min-width: 0; }
+
+/* --------------------------------------------------------------------------
+   Trend panel
+   -------------------------------------------------------------------------- */
+.trend-overall {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin: 0.9rem 0;
+  padding: 0.8rem 0.9rem;
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.028);
+  border: 1px solid var(--ink-4);
+  border-left: 2px solid var(--ink-4);
+}
+.trend-overall.improving { border-left-color: rgba(246, 245, 243, 0.95); }
+.trend-overall.declining { border-left-color: rgba(246, 245, 243, 0.68); }
+.trend-overall strong { font-weight: 500; font-size: 0.95rem; }
+.trend-verdict {
+  font: 500 0.58rem/1 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.trend-list { list-style: none; margin: 0.6rem 0 0; padding: 0; display: grid; gap: 0.55rem; }
+.trend-list li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.15rem 0.7rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--ink-4);
+  font-size: 0.85rem;
+}
+.trend-list li:last-child { border-bottom: 0; padding-bottom: 0; }
+.trend-list .muted.tiny { grid-column: 1 / -1; }
+.trend-num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.trend-details { margin-top: 1rem; }
+.trend-details summary {
+  cursor: pointer;
+  font: 500 0.6rem/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.trend-details summary:hover { color: var(--ink-2); }
+
+/* Links inside muted explanatory text must stay monochrome — an unstyled
+   anchor renders in browser blue, which is the one colour this palette has no
+   room for. */
+.muted a,
+.tips a,
+.lede a,
+.live-caveat a,
+.band-message a,
+.verdict-fix a,
+.radar-note a,
+.bm-note a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--ink-4);
+  text-underline-offset: 2px;
+}
+.muted a:hover,
+.tips a:hover,
+.lede a:hover,
+.live-caveat a:hover,
+.band-message a:hover,
+.verdict-fix a:hover,
+.radar-note a:hover,
+.bm-note a:hover { text-decoration-color: var(--ink-2); }
+
+/* --------------------------------------------------------------------------
+   Guide & diagnostics
+   -------------------------------------------------------------------------- */
+.guide-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: var(--gap);
+}
+.guide-nav a {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--ink-4);
+  border-radius: 999px;
+  font: 500 0.62rem/1.6 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  text-decoration: none;
+}
+.guide-nav a:hover { color: var(--ink); border-color: var(--edge-hi); }
+
+/* Anchored sections must not land under the sticky header. */
+.guide-section { scroll-margin-top: 1.5rem; }
+.guide-lede { margin: 0 0 1rem; font-size: 0.92rem; }
+.guide-sub {
+  margin: 1.4rem 0 0.5rem;
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+.guide-sub:first-of-type { margin-top: 0.6rem; }
+
+.guide-steps { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.8rem; }
+.guide-steps li { font-size: 0.87rem; color: var(--ink-2); }
+.guide-steps strong { color: var(--ink); font-weight: 500; }
+
+.guide-defs { margin: 0; display: grid; gap: 1rem; }
+.guide-defs dt {
+  font-size: 0.88rem;
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+}
+.guide-defs dd { margin: 0; font-size: 0.86rem; color: var(--ink-2); }
+
+/* Tables scroll inside their own box so the page body never scrolls sideways. */
+.guide-table-wrap {
+  overflow-x: auto;
+  margin: 1rem calc(var(--pad) * -1) 0.8rem;
+  padding: 0 var(--pad);
+}
+.guide-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.guide-table th, .guide-table td {
+  padding: 0.6rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+.guide-table thead th {
+  font: 500 0.58rem/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  border-bottom: 1px solid var(--ink-4);
+  white-space: nowrap;
+}
+.guide-table tbody th { font-weight: 500; white-space: nowrap; }
+.guide-table tbody td { color: var(--ink-2); }
+.guide-table tbody tr + tr th, .guide-table tbody tr + tr td {
+  border-top: 1px solid var(--ink-4);
+}
+.guide-table.compact td, .guide-table.compact th { padding: 0.4rem 0.7rem; }
+.guide-table .num {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.diag-headline { margin: 0.8rem 0; font-size: 0.92rem; }
+.diag-headline.good { color: var(--ink); }
+.diag-headline.bad { color: var(--ink); font-weight: 500; }
+
+.diag-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.8rem; }
+.diag-list li {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.028);
+  border: 1px solid var(--ink-4);
+  border-left-width: 2px;
+}
+.diag-list li.ok { border-left-color: rgba(246, 245, 243, 0.85); }
+.diag-list li.bad { border-left-color: rgba(246, 245, 243, 1); }
+.diag-list li.off { border-left-color: rgba(246, 245, 243, 0.22); }
+.diag-state {
+  font: 500 0.54rem/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.diag-label { font-size: 0.88rem; font-weight: 500; }
+.diag-remedy {
+  margin-top: 0.35rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+.diag-versions {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+}
+.diag-versions li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--ink-2);
+}
+.diag-versions li span:last-child {
+  font-family: var(--mono);
+  color: var(--ink);
+}
+
+/* Footer now carries two links. */
+.foot-links { display: inline-flex; gap: 1rem; }
+/* A Link styled as .btn needs the anchor defaults removed. */
+a.btn { text-decoration: none; display: inline-flex; align-items: center; }
+
+/* ==========================================================================
+   Interactive analytics
+
+   Everything below serves one idea: a measurement the reader can interrogate
+   beats a number they have to accept. So charts are controls, criterion rows are
+   buttons, and every tolerance is drawn as a region rather than described in a
+   caption. The palette stays monochrome — quality is luminance — with the two
+   limb hues reserved, as everywhere else, for left and right.
+   ========================================================================== */
+
+/* Result lenses. Four questions, four tabs, one player above them. */
+.lens-tabs { display: flex; width: 100%; overflow-x: auto; scrollbar-width: none; }
+.lens-tabs::-webkit-scrollbar { display: none; }
+.lens-tabs .tab { flex: 1 0 auto; }
+
+/* A criterion row that is also a control. It has to reset the UA button styling
+   without losing the grid the static row uses. */
+.row.pickable {
+  appearance: none;
+  width: 100%;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.row.pickable:hover { background: rgba(255, 255, 255, 0.04); }
+.row.on { background: rgba(255, 255, 255, 0.06); }
+.row-marks {
+  grid-column: 1 / -1;
+  margin-top: 0.35rem;
+  font: 500 0.56rem/1.5 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+/* --------------------------------------------------------------------------
+   Grade scale — the six bands, with this walk marked on them
+   -------------------------------------------------------------------------- */
+.grades { margin-top: 1.1rem; max-width: 26rem; }
+.grade-track {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--ink-4);
+}
+.grade-band {
+  position: absolute; top: 0; bottom: 0;
+  border-right: 1px solid var(--void);
+  background: rgba(246, 245, 243, 0.14);
+}
+.grade-band.on { background: rgba(246, 245, 243, 0.62); }
+.grade-mark {
+  position: absolute; top: -3px; bottom: -3px; width: 2px;
+  margin-left: -1px;
+  background: var(--ink);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+}
+.grade-ticks {
+  position: relative;
+  height: 1rem;
+  margin-top: 0.3rem;
+}
+.grade-ticks span {
+  position: absolute;
+  transform: translateX(-50%);
+  font: 500 0.5rem/1 var(--mono);
+  letter-spacing: 0.08em;
+  color: var(--ink-4);
+}
+.grade-gap {
+  margin: 0.5rem 0 0;
+  font: 500 0.55rem/1 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* --------------------------------------------------------------------------
+   Radar
+   -------------------------------------------------------------------------- */
+.radar svg { width: 100%; height: auto; display: block; overflow: visible; }
+.radar-label {
+  font: 500 0.4rem/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  fill: var(--ink-3);
+  transition: fill 0.2s;
+}
+.radar-num {
+  font: 400 0.46rem/1 var(--display);
+  fill: var(--ink-4);
+  font-variant-numeric: tabular-nums;
+}
+.radar-hit { cursor: pointer; }
+.radar-hit:hover .radar-label,
+.radar-hit.on .radar-label { fill: var(--ink); }
+.radar-hit:hover .radar-num,
+.radar-hit.on .radar-num { fill: var(--ink-2); }
+.radar-hit:focus-visible { outline: none; }
+.radar-hit:focus-visible .radar-label { fill: var(--ink); text-decoration: underline; }
+.radar-note {
+  margin: 0.6rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--ink-3);
+  min-height: 2.6em;
+}
+.radar-note strong { color: var(--ink); font-weight: 500; }
+
+/* --------------------------------------------------------------------------
+   Body map
+   -------------------------------------------------------------------------- */
+.bodymap { display: grid; justify-items: center; }
+.bodymap svg { width: 100%; max-width: 15rem; height: auto; display: block; overflow: visible; }
+.bm-part { cursor: pointer; transition: opacity 0.2s; }
+.bm-part:hover { opacity: 0.75; }
+/* The selected region gets an outline rather than a brighter fill: the fill is
+   carrying the score, and overriding it would overwrite the data. */
+.bm-part.on > * { outline: none; filter: drop-shadow(0 0 4px rgba(246, 245, 243, 0.55)); }
+.bm-part:focus-visible { outline: 1px solid var(--ink); outline-offset: 2px; }
+.bm-tag {
+  font: 500 0.34rem/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  fill: var(--ink-4);
+}
+.bm-note {
+  margin: 0.7rem 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-3);
+  text-align: center;
+  min-height: 2.4em;
+}
+.bm-note strong { color: var(--ink); font-weight: 500; }
+
+/* --------------------------------------------------------------------------
+   Timeline explorer
+   -------------------------------------------------------------------------- */
+.tlx { margin-top: 1rem; }
+.tlx-tabs { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.7rem; }
+/* A second or third trace is drawn dimmer on the chart, so its chip is dimmer
+   too — otherwise the legend and the lines disagree about which is primary. */
+.tl-tab.on.second { background: rgba(246, 245, 243, 0.55); }
+.tlx-flag { margin-left: 0.25rem; font-weight: 700; }
+
+.tlx-plot {
+  position: relative;
+  height: 96px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--ink-4);
+  background: rgba(255, 255, 255, 0.022);
+  overflow: hidden;
+  cursor: crosshair;
+  touch-action: none;      /* a drag must brush the chart, not scroll the page */
+}
+.tlx-plot svg { width: 100%; height: 100%; display: block; }
+.tlx-plot:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.tlx-hover {
+  position: absolute; top: 0; bottom: 0; width: 1px;
+  background: rgba(246, 245, 243, 0.4);
+  pointer-events: none;
+}
+/* Worst-moment markers: a diamond on the baseline, clickable. */
+.tlx-evidence {
+  position: absolute;
+  bottom: 3px;
+  width: 9px; height: 9px;
+  margin-left: -4.5px;
+  padding: 0;
+  border: 1px solid var(--ink);
+  background: var(--void);
+  transform: rotate(45deg);
+  cursor: pointer;
+}
+.tlx-evidence:hover { background: var(--ink); }
+
+.tlx-read {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+.tlx-time {
+  display: grid;
+  align-content: center;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.04);
+  font: 500 0.8rem/1.2 var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.tlx-time small {
+  font: 500 0.5rem/1 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+.tlx-value {
+  appearance: none;
+  flex: 1 1 9rem;
+  min-width: 0;
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--ink-4);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.tlx-value:hover:not(:disabled) { border-color: var(--edge); background: rgba(255,255,255,0.04); }
+.tlx-value:disabled { cursor: default; }
+.tlx-value strong {
+  font: 500 0.86rem/1.2 var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+.tlx-value-name {
+  font: 500 0.54rem/1.3 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.tlx-swatch {
+  display: inline-block;
+  width: 12px; height: 2px;
+  background: var(--ink);
+  vertical-align: middle;
+  margin-bottom: 0.15rem;
+}
+.tlx-range {
+  font: 500 0.54rem/1.4 var(--mono);
+  letter-spacing: 0.06em;
+  color: var(--ink-4);
+  overflow-wrap: anywhere;
+}
+.tlx-reset {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-decoration-color: var(--ink-4);
+  text-transform: inherit;
+  letter-spacing: inherit;
+}
+.tlx-reset:hover { color: var(--ink); }
+
+/* Foot marks become controls in the explorer. */
+.tl-strike {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+}
+.tl-strike:hover { box-shadow: 0 0 5px rgba(255, 255, 255, 0.7); }
+
+/* --------------------------------------------------------------------------
+   Player controls
+   -------------------------------------------------------------------------- */
+.speeds { display: inline-flex; gap: 0.25rem; }
+.speeds .chip { padding: 0.4rem 0.55rem; }
+.player-bar .btn { padding: 0.6rem 0.85rem; }
+
+/* --------------------------------------------------------------------------
+   Criterion detail — the bands behind one score
+   -------------------------------------------------------------------------- */
+.detail-picker { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 1.1rem; }
+.detail-picker .chip { padding: 0.38rem 0.6rem; font-size: 0.56rem; }
+
+.detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.detail-name { margin: 0; font: 400 1.25rem/1.2 var(--display); }
+.detail-sub {
+  margin: 0.3rem 0 0;
+  font: 500 0.56rem/1.6 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.detail-marks { text-align: right; display: grid; gap: 0.2rem; }
+.detail-score {
+  font: 400 2rem/1 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.detail-score small {
+  font: 500 0.55rem/1 var(--mono);
+  letter-spacing: 0.16em;
+  color: var(--ink-3);
+}
+.detail-weight {
+  font: 500 0.55rem/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.detail-bar {
+  height: 3px;
+  margin: 0.9rem 0 0.4rem;
+  background: var(--ink-4);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.detail-bar i {
+  display: block; height: 100%;
+  background: var(--ink);
+  border-radius: 3px;
+  animation: grow 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: left;
+}
+.detail-disagree { margin: 0.7rem 0 0; }
+
+.bands { display: grid; gap: 1.15rem; margin-top: 1.2rem; }
+.band { padding-bottom: 1.05rem; border-bottom: 1px solid var(--ink-4); }
+.band:last-child { border-bottom: 0; padding-bottom: 0; }
+.band-row { display: flex; align-items: baseline; justify-content: space-between; gap: 0.7rem; }
+.band-label { font-size: 0.9rem; color: var(--ink-2); }
+.band.out .band-label { color: var(--ink); font-weight: 500; }
+.band-value {
+  font: 500 0.85rem/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* The gauge. The shaded strip is the region scoring at least half marks, so a
+   marker just outside it reads as a near miss rather than a failure. */
+.band-gauge {
+  position: relative;
+  height: 8px;
+  margin: 0.5rem 0 0.4rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+.band-ok {
+  position: absolute; top: 0; bottom: 0;
+  background: rgba(246, 245, 243, 0.2);
+}
+.band-ideal {
+  position: absolute; top: 0; bottom: 0; width: 1px;
+  background: rgba(246, 245, 243, 0.5);
+}
+.band-at {
+  position: absolute; top: -2px; bottom: -2px; width: 3px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: var(--ink);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+}
+.band.out .band-at { box-shadow: 0 0 6px rgba(255, 255, 255, 0.45); }
+/* A measurement past three tolerances is pinned to the edge and flagged, rather
+   than drawn at a position the axis cannot honestly represent. */
+.band-at.over, .band-at.under { width: 6px; margin-left: -3px; }
+.band-at.over::after, .band-at.under::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 0; height: 0;
+  border: 4px solid transparent;
+}
+.band-at.over::after { left: 4px; margin-top: -4px; border-left-color: var(--ink); }
+.band-at.under::after { right: 4px; margin-top: -4px; border-right-color: var(--ink); }
+.band-off { color: var(--ink-2); }
+.band-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font: 500 0.54rem/1.5 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+.band-message { margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--ink-2); }
+.band-seek {
+  appearance: none;
+  margin-top: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: 500 0.58rem/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.band-seek:hover { color: var(--ink); }
+
+/* --------------------------------------------------------------------------
+   Marks — where the hundred went
+   -------------------------------------------------------------------------- */
+.marks { display: grid; gap: 0.15rem; }
+.marks-row {
+  appearance: none;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 0.2rem 0.7rem;
+  width: 100%;
+  padding: 0.6rem 0.4rem;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.marks-row:hover { background: rgba(255, 255, 255, 0.045); }
+.marks-row.on { background: rgba(255, 255, 255, 0.07); }
+.marks-name { font-size: 0.88rem; }
+.marks-num {
+  font: 500 0.8rem/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: currentColor;
+}
+/* Bar width is what the criterion is worth; the fill is what it earned. */
+.marks-track {
+  grid-column: 1 / -1;
+  height: 4px;
+  background: var(--ink-4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.marks-track i {
+  display: block; height: 100%;
+  background: currentColor;
+  border-radius: 2px;
+  transform-origin: left;
+  animation: grow 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.marks-weight {
+  grid-column: 1 / -1;
+  font: 500 0.52rem/1.4 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+/* --------------------------------------------------------------------------
+   Strides
+   -------------------------------------------------------------------------- */
+.stride-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5.2rem, 1fr));
+  gap: 1px;
+  margin-bottom: 1.1rem;
+}
+/* Same hairline-per-tile treatment as .live-metrics, for the same reason: five
+   tiles do not divide evenly into an auto-fit row at every width. */
+.stride-stats .stat {
+  padding: 0.75rem 0.7rem;
+  box-shadow: 0 0 0 1px var(--ink-4);
+}
+.stride-stats dd { font-size: 1.3rem; }
+.stride-stats dd small {
+  font: 500 0.5rem/1 var(--mono);
+  color: var(--ink-3);
+  margin-left: 0.15rem;
+}
+
+.stride-lane { display: grid; grid-template-columns: 2.6rem 1fr; align-items: end; gap: 0.6rem; }
+.stride-lane + .stride-lane { margin-top: 0.6rem; }
+.stride-side {
+  font: 500 0.55rem/1 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding-bottom: 0.3rem;
+}
+/* The lane is a time axis, shared with the traces above it: a stride sits where
+   it happened and is as wide as it lasted. */
+.stride-bars {
+  position: relative;
+  height: 46px;
+  border-bottom: 1px solid var(--ink-4);
+}
+.stride-bar {
+  appearance: none;
+  position: absolute;
+  bottom: 1px;
+  min-width: 3px;
+  box-sizing: border-box;
+  border: 0;
+  border-right: 1px solid var(--void);
+  border-radius: 2px 2px 0 0;
+  cursor: pointer;
+  transition: opacity 0.15s, box-shadow 0.15s;
+}
+.stride-head {
+  position: absolute;
+  top: -2px; bottom: 0; width: 1px;
+  background: var(--ink);
+  pointer-events: none;
+}
+.stride-bar:hover { box-shadow: 0 0 0 1px var(--ink); }
+.stride-bar.on { box-shadow: 0 0 0 1px var(--ink), 0 0 8px rgba(255,255,255,0.35); }
+.stride-mean {
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: rgba(246, 245, 243, 0.45);
+  pointer-events: none;
+}
+.stride-empty {
+  font: 500 0.55rem/1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  align-self: center;
+}
+
+/* --------------------------------------------------------------------------
+   Measurements table
+   -------------------------------------------------------------------------- */
+.meas-controls { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem; }
+.meas-controls .field-input { flex: 1 1 auto; padding: 0.6rem 0.8rem; font-size: 0.85rem; }
+.meas-controls .chip { flex: none; cursor: pointer; }
+
+.meas-group + .meas-group { margin-top: 0.5rem; }
+.meas-group summary {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--ink-4);
+  font: 500 0.6rem/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.meas-group summary:hover { color: var(--ink); }
+.meas-count { color: var(--ink-4); }
+.meas-rows { display: grid; gap: 1px; padding: 0.3rem 0 0.6rem; }
+.meas-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  gap: 0.7rem;
+  padding: 0.4rem 0;
+  font-size: 0.85rem;
+}
+.meas-label { color: var(--ink-2); }
+.meas-value {
+  font: 500 0.78rem/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.meas-link {
+  appearance: none;
+  border: 1px solid var(--ink-4);
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  padding: 0.15rem 0.5rem;
+  font: 500 0.52rem/1.5 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.meas-link:hover { color: var(--ink); border-color: var(--edge); }
+.meas-context {
+  font: 500 0.52rem/1.5 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  white-space: nowrap;
+}
+
+/* Focus areas gained a second action, so they need a row for them. */
+.focus-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+.focus-actions .seek-hint { margin-top: 0; }
+.focus-why {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  font: 500 0.58rem/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  text-decoration: underline;
+  text-decoration-color: var(--ink-4);
+}
+.focus-why:hover { color: var(--ink); }
+/* The saved-walk list reuses .focus-item as a button. */
+button.focus-item {
+  width: 100%;
+  appearance: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+@media (max-width: 560px) {
+  .tlx-plot { height: 78px; }
+  .detail-marks { text-align: left; }
+  .meas-row { grid-template-columns: 1fr auto; }
+  .meas-row .meas-link, .meas-row .meas-context { grid-column: 1 / -1; justify-self: start; }
+}
+
+/* --------------------------------------------------------------------------
+   Live coaching — scene verdict, checklist, rolling measurements
+   -------------------------------------------------------------------------- */
+
+/* The verdict, on the video itself, so it is read before the skeleton is. */
+.scene-badge {
+  position: absolute;
+  top: 0.6rem; left: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--edge);
+  background: rgba(8, 9, 11, 0.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font: 500 0.58rem/1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.scene-badge.on { color: var(--ink); border-color: var(--edge-hi); }
+.scene-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--ink-3);
+}
+.scene-badge.on .scene-dot {
+  background: var(--ink);
+  animation: livepulse 1.6s ease-in-out infinite;
+}
+@keyframes livepulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.scene-since { color: var(--ink-4); }
+.scene-badge.paused {
+  color: var(--ink-3);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(8, 9, 11, 0.78);
+}
+.scene-badge.paused .scene-dot {
+  background: var(--ink-4);
+  animation: none;
+}
+.scene-badge.active {
+  border-color: rgba(240, 132, 76, 0.45);
+}
+.scene-badge.active .scene-dot {
+  background: #f0844c;
+  box-shadow: 0 0 6px rgba(240, 132, 76, 0.6);
+}
+
+.btn-start {
+  background: #22c55e !important;
+  border-color: #22c55e !important;
+  color: #08090b !important;
+  font-weight: 600;
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.25);
+}
+.btn-start:hover {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+  color: #08090b !important;
+}
+.btn-stop {
+  background: rgba(239, 68, 68, 0.14) !important;
+  border-color: rgba(239, 68, 68, 0.45) !important;
+  color: #f87171 !important;
+  font-weight: 600;
+}
+.btn-stop:hover {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #fff !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.35);
+}
+
+.verdict { border-left: 2px solid var(--ink-4); }
+.verdict.good { border-left-color: var(--ink); }
+.verdict-title { margin: 0; font: 400 1.35rem/1.2 var(--display); }
+.verdict-detail { margin: 0.5rem 0 0; font-size: 0.89rem; color: var(--ink-2); }
+.verdict-fix {
+  margin: 0.8rem 0 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 0.88rem;
+}
+.verdict-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 0.9rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--ink-4);
+  font: 500 0.54rem/1.5 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+.verdict-link { color: var(--ink-2); }
+
+/* The six requirements, each with the number behind it: the failing row is the
+   instruction, so it must carry its own evidence. */
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.1rem; }
+.checks li {
+  display: grid;
+  grid-template-columns: 1.1rem 1fr auto;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--ink-4);
+}
+.checks li:last-child { border-bottom: 0; }
+.check-mark {
+  font: 500 0.7rem/1 var(--mono);
+  color: var(--ink-4);
+  text-align: center;
+}
+.checks li.ok .check-mark { color: var(--ink); }
+.check-label { font-size: 0.87rem; color: var(--ink-3); }
+.checks li.ok .check-label { color: var(--ink); }
+.checks li.no .check-label { color: var(--ink-2); font-weight: 500; }
+.check-detail {
+  font: 500 0.56rem/1.4 var(--mono);
+  letter-spacing: 0.06em;
+  color: var(--ink-4);
+  text-align: right;
+}
+
+/* Cues are held while the scene is not a walk; the panel says so by receding. */
+.card.paused .cues { opacity: 0.55; }
+
+.rhythm-plot {
+  position: relative;
+  height: 62px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--ink-4);
+  background: rgba(255, 255, 255, 0.022);
+  overflow: hidden;
+}
+.rhythm-plot svg { width: 100%; height: 100%; display: block; }
+.rhythm-step {
+  position: absolute; top: 4px; bottom: 4px; width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+}
+.rhythm-step.left { background: #f0844c; }
+.rhythm-step.right { background: #4ea8de; }
+
+/* Six tiles in an auto-fit grid rarely fill the last row. The usual trick — a
+   lighter background on the container showing through 1px gaps — then paints the
+   empty cells as a solid block, which reads as a rendering fault. Putting the
+   hairline on each tile instead leaves the gaps empty, and adjacent shadows
+   overlap into a single line. */
+.live-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.6rem, 1fr));
+  gap: 1px;
+}
+.live-metric {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.85rem 0.8rem;
+  background: rgba(255, 255, 255, 0.028);
+  box-shadow: 0 0 0 1px var(--ink-4);
+}
+.live-metric-value {
+  font: 400 1.5rem/1 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.live-metric-value small {
+  font: 500 0.5rem/1 var(--mono);
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  margin-left: 0.2rem;
+}
+.live-metric-label {
+  font: 500 0.53rem/1.3 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.live-metric-note { font-size: 0.72rem; line-height: 1.5; color: var(--ink-4); }
+
+.pass-live {
+  margin: 0 0 0.8rem;
+  font: 500 0.58rem/1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.passes { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.1rem; }
+.passes li {
+  display: grid;
+  grid-template-columns: 1.6rem 1fr;
+  gap: 0.2rem 0.6rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--ink-4);
+}
+.passes li:last-child { border-bottom: 0; }
+.pass-index {
+  font: 400 1rem/1 var(--display);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+}
+.pass-main { font-size: 0.85rem; }
+.pass-note {
+  grid-column: 2;
+  font: 500 0.54rem/1.4 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+/* --------------------------------------------------------------------------
+   Record → Analyse — recording buttons, panel, inline result
+   -------------------------------------------------------------------------- */
+
+.btn-rec {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: #f87171 !important;
+  font-weight: 600;
+}
+.btn-rec:hover {
+  background: rgba(239, 68, 68, 0.25) !important;
+  border-color: rgba(239, 68, 68, 0.7) !important;
+}
+.btn-rec-stop {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #fff !important;
+  font-weight: 600;
+  animation: rec-pulse 1.8s ease-in-out infinite;
+}
+@keyframes rec-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+  50%       { box-shadow: 0 0 0 6px rgba(239,68,68,0.25); }
+}
+.btn-analyse {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5) !important;
+  border-color: #6d28d9 !important;
+  color: #fff !important;
+  font-weight: 600;
+  box-shadow: 0 0 20px rgba(109,40,217,0.3);
+}
+.btn-analyse:hover {
+  background: linear-gradient(135deg, #6d28d9, #4338ca) !important;
+  box-shadow: 0 0 28px rgba(109,40,217,0.5);
+}
+
+/* Recording indicator row */
+.rec-live {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.8rem 0;
+  font: 500 0.82rem/1 var(--sans);
+  color: #f87171;
+}
+.rec-dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #ef4444;
+  flex-shrink: 0;
+  animation: livepulse 1.2s ease-in-out infinite;
+}
+
+/* Clip ready area */
+.rec-ready { margin-top: 0.8rem; }
+.rec-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0.6rem 0 1rem;
+  font-size: 0.8rem;
+  color: var(--ink-3);
+}
+.rec-actions { margin-top: 1rem; }
+
+/* Inline result */
+.rec-result { margin-top: 1.4rem; }
+.rec-score {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--edge);
+}
+.rec-numeral {
+  font: 400 3.2rem/1 var(--display);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.rec-numeral small { font-size: 1rem; color: var(--ink-3); }
+.rec-grade { font: 600 1.1rem/1.2 var(--sans); margin: 0 0 0.3rem; }
+.rec-focus-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--ink-4);
+}
+.rec-focus-item:last-child { border-bottom: 0; }
+.rec-score-pill {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  font: 600 0.72rem/1 var(--mono);
+  border: 1px solid var(--edge);
+  background: var(--glass-bg);
+  color: var(--ink-2);
+  min-width: 3.2rem;
+  text-align: center;
+}
+.rec-score-pill.q-1 { color: var(--ink); border-color: var(--edge-hi); }
+.rec-score-pill.q-3 { color: #f59e0b; border-color: rgba(245,158,11,0.4); }
+.rec-score-pill.q-4 { color: #f87171; border-color: rgba(248,113,113,0.4); }

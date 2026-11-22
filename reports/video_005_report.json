@@ -1,0 +1,195 @@
+{
+  "video_id": "video_005",
+  "scores": {
+    "posture": 0.0,
+    "balance": 0.0,
+    "confidence": 10.0,
+    "shoulder_alignment": 0.0,
+    "head_position": 10.0,
+    "arm_swing": 0.0,
+    "hip_movement": 0.0,
+    "rhythm": 0.0,
+    "stride_length": 10.0,
+    "foot_placement": 8.17,
+    "symmetry": 0.0,
+    "stage_presence": 0.0
+  },
+  "overall": 30.5,
+  "grade": "Foundational",
+  "source": "model",
+  "findings": [
+    {
+      "criterion": "shoulder_alignment",
+      "feature": "shoulder_tilt_abs_mean",
+      "measured": 36.8738,
+      "ideal": 2.055,
+      "band_score": 0.004,
+      "severity": 0.4626,
+      "message": "One shoulder sits consistently lower than the other - level the shoulder line."
+    },
+    {
+      "criterion": "posture",
+      "feature": "posture_neck_angle_mean",
+      "measured": 23.9549,
+      "ideal": 7.5308,
+      "band_score": 0.043,
+      "severity": 0.3733,
+      "message": "Your neck juts forward of your shoulders; lengthen the back of the neck."
+    },
+    {
+      "criterion": "arm_swing",
+      "feature": "arm_swing_amp_error",
+      "measured": 0.4187,
+      "ideal": 0.1574,
+      "band_score": 0.007,
+      "severity": 0.3538,
+      "message": "Your arm swing is off - aim for a relaxed, even swing from the shoulder."
+    },
+    {
+      "criterion": "symmetry",
+      "feature": "sym_overall_index",
+      "measured": 0.3991,
+      "ideal": 0.1638,
+      "band_score": 0.065,
+      "severity": 0.2804,
+      "message": "Your left and right sides move by noticeably different amounts."
+    },
+    {
+      "criterion": "arm_swing",
+      "feature": "arm_swing_asymmetry",
+      "measured": 0.9983,
+      "ideal": 0.1425,
+      "band_score": 0.001,
+      "severity": 0.2796,
+      "message": "Your two arms swing by different amounts."
+    },
+    {
+      "criterion": "stage_presence",
+      "feature": "conf_chest_openness",
+      "measured": 0.2777,
+      "ideal": 1.6546,
+      "band_score": 0.001,
+      "severity": 0.2051,
+      "message": "Open the chest and draw the shoulder blades back - presence starts with carriage."
+    },
+    {
+      "criterion": "arm_swing",
+      "feature": "arm_swing_phase_offset",
+      "measured": 0.0312,
+      "ideal": 0.1771,
+      "band_score": 0.062,
+      "severity": 0.1911,
+      "message": "Your arms are not opposing your legs; the swing should alternate with the stride."
+    },
+    {
+      "criterion": "symmetry",
+      "feature": "sym_ankle_index",
+      "measured": 0.3369,
+      "ideal": 0.0848,
+      "band_score": 0.008,
+      "severity": 0.1785,
+      "message": "Your two legs are not swinging equally."
+    },
+    {
+      "criterion": "stage_presence",
+      "feature": "hip_counter_rotation_amp",
+      "measured": 0.0134,
+      "ideal": 0.168,
+      "band_score": 0.0,
+      "severity": 0.1263,
+      "message": "Add a little controlled torso rotation - the walk currently reads as stiff."
+    }
+  ],
+  "strengths": [
+    "Walking Confidence",
+    "Head Position & Gaze",
+    "Stride Length",
+    "Foot Placement"
+  ],
+  "quality_warnings": [
+    "Clip is only 1.7s; at least 4-6 seconds (4+ strides) gives a stable reading.",
+    "Fewer than four steps were detected - timing and symmetry scores are unreliable on this clip."
+  ],
+  "coaching": {
+    "headline": "Foundational walk - 31/100. Start with posture and balance.",
+    "summary": "Across twelve criteria your strongest work is walking confidence, and the biggest single gain available is in shoulder alignment. Work the 3 focus area(s) below before adding anything else.",
+    "focus_areas": [
+      {
+        "criterion": "shoulder_alignment",
+        "label": "Shoulder Alignment",
+        "score": 0.0,
+        "issue": "One shoulder sits consistently lower than the other - level the shoulder line.",
+        "feature": "shoulder_tilt_abs_mean",
+        "measured": 36.8738,
+        "target": 2.055
+      },
+      {
+        "criterion": "posture",
+        "label": "Posture & Spinal Alignment",
+        "score": 0.0,
+        "issue": "Your neck juts forward of your shoulders; lengthen the back of the neck.",
+        "feature": "posture_neck_angle_mean",
+        "measured": 23.9549,
+        "target": 7.5308
+      },
+      {
+        "criterion": "arm_swing",
+        "label": "Arm Swing",
+        "score": 0.0,
+        "issue": "Your arm swing is off - aim for a relaxed, even swing from the shoulder.",
+        "feature": "arm_swing_amp_error",
+        "measured": 0.4187,
+        "target": 0.1574
+      }
+    ],
+    "strengths": [
+      "Walking Confidence",
+      "Head Position & Gaze",
+      "Stride Length",
+      "Foot Placement"
+    ],
+    "drills": [
+      {
+        "for": "Shoulder Alignment",
+        "name": "Shoulder reset",
+        "instruction": "Roll both shoulders up, back and down before each pass; walk keeping the collarbones wide.",
+        "duration": "before each pass"
+      },
+      {
+        "for": "Shoulder Alignment",
+        "name": "Mirror check",
+        "instruction": "Walk toward a mirror and watch the shoulder line stay level across every step.",
+        "duration": "10 min"
+      },
+      {
+        "for": "Posture & Spinal Alignment",
+        "name": "Wall alignment",
+        "instruction": "Stand with heels, hips, shoulders and head touching a wall. Hold, step away keeping the shape, and walk five metres.",
+        "duration": "5 min daily"
+      },
+      {
+        "for": "Posture & Spinal Alignment",
+        "name": "Book walk",
+        "instruction": "Walk with a book balanced on your head. Keep the ribcage stacked over the pelvis rather than leaning to hold it.",
+        "duration": "10 min"
+      },
+      {
+        "for": "Arm Swing",
+        "name": "Relaxed pendulum",
+        "instruction": "Walk letting the arms swing from the shoulder, elbows soft. Do not drive them; let the stride move them.",
+        "duration": "10 lengths"
+      },
+      {
+        "for": "Arm Swing",
+        "name": "Even swing",
+        "instruction": "Walk counting the swing of each arm; match the two amplitudes.",
+        "duration": "8 lengths"
+      }
+    ],
+    "next_session": [
+      "Film another pass after working shoulder alignment",
+      "Film another pass after working posture & spinal alignment",
+      "Record from the same distance and angle so scores stay comparable."
+    ]
+  }
+}

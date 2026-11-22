@@ -1,0 +1,231 @@
+{
+  "video_id": "video_003",
+  "scores": {
+    "posture": 10.0,
+    "balance": 7.64,
+    "confidence": 7.64,
+    "shoulder_alignment": 0.0,
+    "head_position": 1.85,
+    "arm_swing": 4.63,
+    "hip_movement": 4.09,
+    "rhythm": 0.0,
+    "stride_length": 4.35,
+    "foot_placement": 8.17,
+    "symmetry": 1.05,
+    "stage_presence": 1.78
+  },
+  "overall": 48.7,
+  "grade": "Beginner",
+  "source": "model",
+  "findings": [
+    {
+      "criterion": "shoulder_alignment",
+      "feature": "shoulder_tilt_abs_mean",
+      "measured": 36.874,
+      "ideal": 2.055,
+      "band_score": 0.004,
+      "severity": 0.4626,
+      "message": "One shoulder sits consistently lower than the other - level the shoulder line."
+    },
+    {
+      "criterion": "symmetry",
+      "feature": "sym_overall_index",
+      "measured": 0.3536,
+      "ideal": 0.1638,
+      "band_score": 0.097,
+      "severity": 0.2424,
+      "message": "Your left and right sides move by noticeably different amounts."
+    },
+    {
+      "criterion": "stride_length",
+      "feature": "stride_leg_shorten_mean",
+      "measured": 0.0159,
+      "ideal": 0.0232,
+      "band_score": 0.104,
+      "severity": 0.1921,
+      "message": "Your stride length is away from ideal for your height."
+    },
+    {
+      "criterion": "head_position",
+      "feature": "posture_neck_angle_mean",
+      "measured": 23.9552,
+      "ideal": 6.215,
+      "band_score": 0.066,
+      "severity": 0.1918,
+      "message": "Your chin drops as you walk; lift the gaze to the end of the runway."
+    },
+    {
+      "criterion": "arm_swing",
+      "feature": "arm_swing_amp_error",
+      "measured": 0.4187,
+      "ideal": 0.1574,
+      "band_score": 0.007,
+      "severity": 0.19,
+      "message": "Your arm swing is off - aim for a relaxed, even swing from the shoulder."
+    },
+    {
+      "criterion": "stage_presence",
+      "feature": "conf_chest_openness",
+      "measured": 0.2777,
+      "ideal": 1.6546,
+      "band_score": 0.001,
+      "severity": 0.1687,
+      "message": "Open the chest and draw the shoulder blades back - presence starts with carriage."
+    },
+    {
+      "criterion": "symmetry",
+      "feature": "sym_ankle_index",
+      "measured": 0.3336,
+      "ideal": 0.0848,
+      "band_score": 0.009,
+      "severity": 0.1597,
+      "message": "Your two legs are not swinging equally."
+    },
+    {
+      "criterion": "head_position",
+      "feature": "head_lateral_offset",
+      "measured": 0.1111,
+      "ideal": 0.0487,
+      "band_score": 0.245,
+      "severity": 0.1551,
+      "message": "Your head sits off the centre line of your body."
+    },
+    {
+      "criterion": "stride_length",
+      "feature": "stride_knee_lift",
+      "measured": 0.0025,
+      "ideal": 0.321,
+      "band_score": 0.0,
+      "severity": 0.1531,
+      "message": "Your knee lift does not match a full, controlled stride."
+    },
+    {
+      "criterion": "arm_swing",
+      "feature": "arm_swing_asymmetry",
+      "measured": 0.9497,
+      "ideal": 0.1425,
+      "band_score": 0.002,
+      "severity": 0.1501,
+      "message": "Your two arms swing by different amounts."
+    },
+    {
+      "criterion": "stride_length",
+      "feature": "stride_foot_clearance",
+      "measured": 0.006,
+      "ideal": 0.4136,
+      "band_score": 0.002,
+      "severity": 0.107,
+      "message": "Your feet are not clearing the floor cleanly."
+    },
+    {
+      "criterion": "stage_presence",
+      "feature": "hip_counter_rotation_amp",
+      "measured": 0.0096,
+      "ideal": 0.168,
+      "band_score": 0.0,
+      "severity": 0.1039,
+      "message": "Add a little controlled torso rotation - the walk currently reads as stiff."
+    },
+    {
+      "criterion": "arm_swing",
+      "feature": "arm_swing_phase_offset",
+      "measured": 0.0312,
+      "ideal": 0.1771,
+      "band_score": 0.062,
+      "severity": 0.1026,
+      "message": "Your arms are not opposing your legs; the swing should alternate with the stride."
+    }
+  ],
+  "strengths": [
+    "Posture & Spinal Alignment",
+    "Balance & Stability",
+    "Walking Confidence",
+    "Foot Placement"
+  ],
+  "quality_warnings": [
+    "Clip is only 1.7s; at least 4-6 seconds (4+ strides) gives a stable reading.",
+    "Fewer than four steps were detected - timing and symmetry scores are unreliable on this clip."
+  ],
+  "coaching": {
+    "headline": "Beginner walk - 49/100. Start with posture and balance.",
+    "summary": "Across twelve criteria your strongest work is posture & spinal alignment, and the biggest single gain available is in shoulder alignment. Work the 3 focus area(s) below before adding anything else.",
+    "focus_areas": [
+      {
+        "criterion": "shoulder_alignment",
+        "label": "Shoulder Alignment",
+        "score": 0.0,
+        "issue": "One shoulder sits consistently lower than the other - level the shoulder line.",
+        "feature": "shoulder_tilt_abs_mean",
+        "measured": 36.874,
+        "target": 2.055
+      },
+      {
+        "criterion": "symmetry",
+        "label": "Body Symmetry",
+        "score": 1.1,
+        "issue": "Your left and right sides move by noticeably different amounts.",
+        "feature": "sym_overall_index",
+        "measured": 0.3536,
+        "target": 0.1638
+      },
+      {
+        "criterion": "stride_length",
+        "label": "Stride Length",
+        "score": 4.3,
+        "issue": "Your stride length is away from ideal for your height.",
+        "feature": "stride_leg_shorten_mean",
+        "measured": 0.0159,
+        "target": 0.0232
+      }
+    ],
+    "strengths": [
+      "Posture & Spinal Alignment",
+      "Balance & Stability",
+      "Walking Confidence",
+      "Foot Placement"
+    ],
+    "drills": [
+      {
+        "for": "Shoulder Alignment",
+        "name": "Shoulder reset",
+        "instruction": "Roll both shoulders up, back and down before each pass; walk keeping the collarbones wide.",
+        "duration": "before each pass"
+      },
+      {
+        "for": "Shoulder Alignment",
+        "name": "Mirror check",
+        "instruction": "Walk toward a mirror and watch the shoulder line stay level across every step.",
+        "duration": "10 min"
+      },
+      {
+        "for": "Body Symmetry",
+        "name": "Video both sides",
+        "instruction": "Film from the front and check the left and right swing match in size and timing.",
+        "duration": "weekly"
+      },
+      {
+        "for": "Body Symmetry",
+        "name": "Unilateral strength",
+        "instruction": "Work the weaker side alone - single-leg squats and step-ups - to even out the two limbs.",
+        "duration": "3 x 12 each side"
+      },
+      {
+        "for": "Stride Length",
+        "name": "Marked stride",
+        "instruction": "Tape floor markers at your target stride and walk landing on each one until the length feels natural.",
+        "duration": "10 lengths"
+      },
+      {
+        "for": "Stride Length",
+        "name": "Slow-motion stride",
+        "instruction": "Walk at half speed with a full stride to feel the reach without rushing.",
+        "duration": "8 lengths"
+      }
+    ],
+    "next_session": [
+      "Film another pass after working shoulder alignment",
+      "Film another pass after working body symmetry",
+      "Record from the same distance and angle so scores stay comparable."
+    ]
+  }
+}

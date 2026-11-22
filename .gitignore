@@ -1,0 +1,25 @@
+.venv/
+.venv39/
+.venv310/
+.venv311/
+.venv312/
+node_modules/
+data/interim/
+*.mp4
+models/mediapipe/
+models/face/
+models/fold_models_*.joblib
+__pycache__/
+.pytest_cache/
+data/media/
+data/runway.db
+
+# macOS. Finder writes .DS_Store into every directory it displays, and AppleDouble
+# ._ files appear whenever the tree crosses a non-Apple filesystem - a zip, a USB
+# stick, OneDrive. web/.gitignore already lists .DS_Store; this is the root, where
+# data/, models/, reports/, scripts/ and src/ live.
+.DS_Store
+._*
+.AppleDouble
+.Spotlight-V100
+.Trashes

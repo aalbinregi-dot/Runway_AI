@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Runway Coach Splash</title>
+<style>
+:root{--bg:#07080b;--panel:#151821;--line:#2a2f3d;--bone:#e8eaf0;--accent:#f5841f;--muted:#8a90a2}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--bone);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden}
+
+/* ---------- HOME PAGE (placeholder: replace with your real app) ---------- */
+.home{position:fixed;inset:0;display:grid;place-content:center;justify-items:center;gap:18px;text-align:center;padding:24px;opacity:0;transform:scale(.97);transition:opacity .7s ease .25s,transform .7s ease .25s}
+.home h1{margin:0;font-size:clamp(1.8rem,5vw,2.6rem)}
+.home p{margin:0;color:var(--muted)}
+.home button{background:var(--accent);color:#1a0f02;border:0;border-radius:999px;padding:13px 28px;font-size:1rem;font-weight:700;cursor:pointer}
+body.ready .home{opacity:1;transform:none}
+
+/* ---------- SPLASH ---------- */
+.splash{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:10;cursor:pointer;transition:opacity .7s ease .15s,visibility 0s linear .9s}
+body.ready .splash{opacity:0;visibility:hidden;pointer-events:none}
+.scene{position:relative;width:min(340px,86vw);height:min(560px,88vh)}
+.beam{position:absolute;left:50%;top:-6%;width:130%;height:74%;transform-origin:50% 0;transform:translateX(-50%) rotate(-28deg);
+  background:linear-gradient(to bottom,rgba(255,217,168,.75),rgba(245,132,31,.06));
+  clip-path:polygon(44% 0,56% 0,100% 100%,0 100%);opacity:0;animation:sweep 1.1s cubic-bezier(.3,.8,.3,1) .2s forwards}
+@keyframes sweep{to{opacity:1;transform:translateX(-50%) rotate(0)}}
+body.ready .beam{transition:transform .9s ease,opacity .9s ease;transform:translateX(-50%) scale(3.2,1.6);opacity:0}
+.runway{position:absolute;left:8%;right:8%;bottom:14%;height:15%;background:linear-gradient(#151821,#0d0f15);clip-path:polygon(18% 0,82% 0,100% 100%,0 100%);opacity:0;animation:fade .8s ease .8s forwards}
+.runway::before{content:"";position:absolute;left:18%;right:18%;top:0;height:2px;background:var(--accent);opacity:.6}
+.fig{position:absolute;left:50%;top:6%;width:70%;transform:translateX(-50%)}
+.fig svg{width:100%;display:block;overflow:visible}
+.bone{stroke:var(--bone);stroke-width:3;stroke-linecap:round;fill:none;stroke-dasharray:60;stroke-dashoffset:60;animation:draw .7s ease forwards}
+.dot{fill:var(--accent);opacity:0;animation:pop .35s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}
+@keyframes fade{to{opacity:1}}
+.dot{transform-box:fill-box;transform-origin:center}
+.title{position:absolute;left:0;right:0;top:61%;text-align:center;font-weight:800;font-size:clamp(1.2rem,5.4vw,1.55rem);letter-spacing:.42em;padding-left:.42em;color:#fff}
+.title span{display:inline-block;opacity:0;transform:translateY(8px);animation:rise .5s ease forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+.tag{position:absolute;left:0;right:0;top:65.5%;text-align:center;color:var(--muted);font-size:.85rem;opacity:0;animation:fade .6s ease 2.1s forwards}
+.progress{position:absolute;left:14%;right:14%;bottom:9%;height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:var(--accent);animation:load 2.6s cubic-bezier(.4,.1,.2,1) .3s forwards}
+@keyframes load{to{width:100%}}
+.skip{position:absolute;bottom:3%;left:0;right:0;text-align:center;color:var(--muted);font-size:.72rem;opacity:.7}
+@media (prefers-reduced-motion:reduce){.beam,.runway,.bone,.dot,.title span,.tag{animation-duration:.01s;animation-delay:0s}.progress i{animation-duration:.5s}}
+</style>
+</head>
+<body>
+
+<main class="home" aria-label="Home">
+  <h1>Runway Coach</h1>
+  <p>Film a walk. Get marks, reasons and drills.</p>
+  <button type="button">Upload a walk</button>
+</main>
+
+<div class="splash" id="splash" role="status" aria-live="polite" aria-label="Loading Runway Coach">
+  <div class="scene">
+    <div class="beam"></div>
+    <div class="runway"></div>
+    <div class="fig">
+      <svg viewBox="0 20 200 170" aria-hidden="true">
+        <g id="bones"></g><g id="dots"></g>
+      </svg>
+    </div>
+    <div class="title" id="title" aria-hidden="true"></div>
+    <div class="tag">Video in, marks and drills out</div>
+    <div class="progress"><i></i></div>
+    <div class="skip">Tap to skip</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var NS="http://www.w3.org/2000/svg";
+  var pts={head:[100,48],ls:[85,70],rs:[115,70],le:[72,92],re:[128,92],lw:[68,114],rw:[132,114],lh:[92,112],rh:[108,112],lk:[90,142],rk:[110,142],la:[88,172],ra:[112,172]};
+  var links=[["ls","rs"],["lh","rh"],["ls","lh"],["rs","rh"],["ls","le"],["le","lw"],["rs","re"],["re","rw"],["lh","lk"],["lk","la"],["rh","rk"],["rk","ra"]];
+  var bones=document.getElementById("bones"),dots=document.getElementById("dots");
+  // dots first (staggered), bones follow
+  Object.keys(pts).forEach(function(k,i){
+    var c=document.createElementNS(NS,k==="head"?"circle":"circle");
+    c.setAttribute("cx",pts[k][0]);c.setAttribute("cy",pts[k][1]);c.setAttribute("r",k==="head"?5:3.8);
+    c.setAttribute("class","dot");c.style.animationDelay=(0.9+i*.07)+"s";dots.appendChild(c);
+  });
+  var hc=document.createElementNS(NS,"circle");hc.setAttribute("cx",100);hc.setAttribute("cy",48);hc.setAttribute("r",10);
+  hc.setAttribute("class","bone");hc.style.animationDelay="1.8s";hc.setAttribute("style","stroke-dasharray:70;stroke-dashoffset:70;animation-delay:1.8s");bones.appendChild(hc);
+  var neck=document.createElementNS(NS,"line");neck.setAttribute("x1",100);neck.setAttribute("y1",58);neck.setAttribute("x2",100);neck.setAttribute("y2",70);neck.setAttribute("class","bone");neck.style.animationDelay="1.8s";bones.appendChild(neck);
+  links.forEach(function(l,i){
+    var a=pts[l[0]],b=pts[l[1]],ln=document.createElementNS(NS,"line");
+    ln.setAttribute("x1",a[0]);ln.setAttribute("y1",a[1]);ln.setAttribute("x2",b[0]);ln.setAttribute("y2",b[1]);
+    ln.setAttribute("class","bone");ln.style.animationDelay=(1.8+i*.06)+"s";bones.appendChild(ln);
+  });
+  // title letters
+  var t=document.getElementById("title"),word="RUNWAY COACH";
+  word.split("").forEach(function(ch,i){var s=document.createElement("span");s.textContent=ch===" "?" ":ch;s.style.animationDelay=(1.5+i*.07)+"s";t.appendChild(s)});
+
+  // finish: wait for the real app AND a minimum splash time, then open the home page
+  var MIN=3200,start=Date.now(),done=false;
+  function finish(){if(done)return;done=true;document.body.classList.add("ready")}
+  function whenReady(){var wait=Math.max(0,MIN-(Date.now()-start));setTimeout(finish,wait)}
+  if(document.readyState==="complete")whenReady();else window.addEventListener("load",whenReady);
+  document.getElementById("splash").addEventListener("click",finish);
+  setTimeout(finish,8000); // safety: never trap the user on the splash
+})();
+</script>
+</body>
+</html>

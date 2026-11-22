@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Runway Performance Analysis and Virtual Coaching System - Presentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --card-bg: #141923;
+      --card-border: #1f2737;
+      --text-main: #f0f3f8;
+      --text-muted: #8e9bb0;
+      --orange: #ff8c32;
+      --blue: #3b82f6;
+      --cyan: #06b6d4;
+      --green: #10b981;
+      --purple: #8b5cf6;
+      --accent: #ff8c32;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Top presentation navigation bar */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 32px;
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(11, 14, 20, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+    }
+
+    .project-tag {
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .project-tag span {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--orange);
+      border-radius: 50%;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      background: #1e2637;
+      border-color: #2e3a52;
+    }
+
+    .slide-counter {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      min-width: 65px;
+      text-align: center;
+    }
+
+    /* Slide container viewport */
+    .deck-container {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 120px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px 48px;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 24px 48px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(16px);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    /* Content styling */
+    .slide-header {
+      margin-bottom: 24px;
+    }
+
+    .slide-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .slide-subtitle {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Grid layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    /* Card styling */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .stat-card {
+      padding: 32px 28px;
+      justify-content: center;
+    }
+
+    .stat-value {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 12px;
+      letter-spacing: -0.03em;
+    }
+
+    .stat-value.orange { color: var(--orange); }
+    .stat-value.blue { color: var(--blue); }
+    .stat-value.cyan { color: var(--cyan); }
+    .stat-value.green { color: var(--green); }
+    .stat-value.purple { color: var(--purple); }
+
+    .stat-label {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .stat-subtext {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Bullets and paragraphs */
+    .bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .bullet-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      font-size: 1.15rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+
+    .bullet-icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: rgba(255, 140, 50, 0.15);
+      color: var(--orange);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .bullet-icon.blue {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--blue);
+    }
+
+    .bullet-icon.green {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--green);
+    }
+
+    /* Table styles */
+    .table-container {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+
+    th {
+      background: #19202e;
+      color: var(--text-muted);
+      padding: 12px 18px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 12px 18px;
+      border-top: 1px solid var(--card-border);
+      color: #e2e8f0;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-high { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .badge-mid { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .badge-flag { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+    /* Code & equations */
+    .code-box {
+      background: #0d1117;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: #58a6ff;
+      margin: 12px 0;
+    }
+
+    /* Footer bar */
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 48px;
+      border-top: 1px solid var(--card-border);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      background: rgba(11, 14, 20, 0.95);
+    }
+
+    .footer-left {
+      font-weight: 500;
+    }
+
+    .footer-note {
+      color: #94a3b8;
+      max-width: 600px;
+      text-align: right;
+    }
+
+    .key-shortcut {
+      background: #1f2737;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: monospace;
+      color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="project-tag">
+      <span></span> Runway AI &bull; Virtual Coaching System
+    </div>
+    <div class="nav-controls">
+      <button class="nav-btn" onclick="prevSlide()">&#8592; Prev</button>
+      <div class="slide-counter" id="slideNum">1 / 15</div>
+      <button class="nav-btn" onclick="nextSlide()">Next &#8594;</button>
+      <button class="nav-btn" onclick="toggleFullscreen()">&#x26F6; Fullscreen</button>
+    </div>
+  </header>
+
+  <div class="deck-container">
+
+    <!-- SLIDE 1: Title -->
+    <div class="slide active" id="slide-1">
+      <div class="slide-header">
+        <div class="slide-subtitle">B.Tech / Final Year Project Presentation</div>
+        <h1 class="slide-title" style="font-size: 3.5rem; margin-top: 10px;">AI-Powered Runway Performance Analysis & Virtual Coaching System</h1>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card" style="justify-content: center; gap: 18px;">
+            <p style="font-size: 1.35rem; line-height: 1.6; color: #cbd5e1;">
+              An end-to-end computer vision and biomechanical machine learning platform that evaluates runway walks across <strong style="color: var(--orange);">12 professional criteria</strong>, explains diagnostic kinematic faults, and issues prescriptive coaching drills.
+            </p>
+            <div style="display: flex; gap: 12px; margin-top: 8px;">
+              <span class="badge badge-high">Computer Vision</span>
+              <span class="badge badge-mid">Gait Biomechanics</span>
+              <span class="badge badge-high">Tabular ML</span>
+              <span class="badge badge-mid">Virtual Coaching</span>
+            </div>
+          </div>
+          <div class="card" style="justify-content: center;">
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              <div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Candidate</div>
+                <div style="font-size: 1.35rem; font-weight: 700; color: #ffffff;">Albin Regi</div>
+              </div>
+              <div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Core Tech Stack</div>
+                <div style="font-size: 1.05rem; color: #cbd5e1;">MediaPipe Pose &bull; Scikit-Learn &bull; SciPy Kinematics &bull; FastAPI &bull; React</div>
+              </div>
+              <div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Engineering Validation</div>
+                <div style="font-size: 1.05rem; color: #10b981; font-weight: 600;">199 Python Tests &bull; 18 Browser Tests Passing</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer-note" style="text-align: left;">Use <span class="key-shortcut">&larr;</span> and <span class="key-shortcut">&rarr;</span> arrow keys or buttons to navigate.</div>
+    </div>
+
+    <!-- SLIDE 2: Problem Statement -->
+    <div class="slide" id="slide-2">
+      <div class="slide-header">
+        <div class="slide-subtitle">Motivation & Industry Problem</div>
+        <h1 class="slide-title">The Challenge in Runway Coaching</h1>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card">
+            <div class="stat-value orange" style="font-size: 2.5rem; margin-bottom: 8px;">$150+ / hr</div>
+            <div class="stat-label">Prohibitive Cost & Access</div>
+            <p class="stat-subtext" style="font-size: 0.95rem; margin-top: 8px;">
+              Professional runway modeling coaches are geographically concentrated in fashion capitals and cost hundreds per session, locking out aspiring talent globally.
+            </p>
+          </div>
+          <div class="card">
+            <div class="stat-value blue" style="font-size: 2.5rem; margin-bottom: 8px;">Subjective</div>
+            <div class="stat-label">Inconsistent Feedback</div>
+            <p class="stat-subtext" style="font-size: 0.95rem; margin-top: 8px;">
+              Human feedback is verbal, abstract ("walk with more presence"), and differs wildly between casting directors with zero objective biomechanical telemetry.
+            </p>
+          </div>
+          <div class="card">
+            <div class="stat-value cyan" style="font-size: 2.5rem; margin-bottom: 8px;">Zero Data</div>
+            <div class="stat-label">No Progress Quantification</div>
+            <p class="stat-subtext" style="font-size: 0.95rem; margin-top: 8px;">
+              Models lack quantified longitudinal tracking. There is no historical metric to prove whether hip sway or shoulder tilt improved week over week.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: System Pipeline -->
+    <div class="slide" id="slide-3">
+      <div class="slide-header">
+        <div class="slide-subtitle">System Architecture</div>
+        <h1 class="slide-title">End-to-End Walk Evaluation Pipeline</h1>
+      </div>
+      <div class="slide-body">
+        <div class="card">
+          <div class="grid-4" style="gap: 16px;">
+            <div style="background: #0f141f; padding: 18px; border-radius: 10px; border-left: 3px solid var(--orange);">
+              <div style="font-size: 0.8rem; color: var(--orange); font-weight: 700; text-transform: uppercase;">Step 1: Input & Tracking</div>
+              <h4 style="margin: 8px 0; color: #fff;">Pose Keypoints</h4>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Standard RGB video input &bull; MediaPipe landmark tracking (33 body keypoints at up to 60 FPS).</p>
+            </div>
+            <div style="background: #0f141f; padding: 18px; border-radius: 10px; border-left: 3px solid var(--blue);">
+              <div style="font-size: 0.8rem; color: var(--blue); font-weight: 700; text-transform: uppercase;">Step 2: Signal Conditioning</div>
+              <h4 style="margin: 8px 0; color: #fff;">Biomechanical Kinematics</h4>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Pelvis-centered normalization &bull; Butterworth high-pass detrending &bull; Hilbert transform gait phase cycles.</p>
+            </div>
+            <div style="background: #0f141f; padding: 18px; border-radius: 10px; border-left: 3px solid var(--purple);">
+              <div style="font-size: 0.8rem; color: var(--purple); font-weight: 700; text-transform: uppercase;">Step 3: Multi-Criterion AI</div>
+              <h4 style="margin: 8px 0; color: #fff;">12 Dedicated ML Models</h4>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">HistGradientBoosting & Blend regressors tuned per criterion, producing calibrated 0–10 score outputs.</p>
+            </div>
+            <div style="background: #0f141f; padding: 18px; border-radius: 10px; border-left: 3px solid var(--green);">
+              <div style="font-size: 0.8rem; color: var(--green); font-weight: 700; text-transform: uppercase;">Step 4: Virtual Coach</div>
+              <h4 style="margin: 8px 0; color: #fff;">Diagnostic Prescriptions</h4>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Identifies primary mechanical flaws &bull; Assigns tailored targeted drills &bull; Longitudinal session storage.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: The Data Challenge & Solution -->
+    <div class="slide" id="slide-4">
+      <div class="slide-header">
+        <div class="slide-subtitle">Data Science Rigor</div>
+        <h1 class="slide-title">Interrogating the Data: Avoiding the Circularity Trap</h1>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <h3 style="color: #f87171; margin-bottom: 12px;">The Initial Data Problem</h3>
+            <ul class="bullet-list">
+              <li class="bullet-item">
+                <div class="bullet-icon" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">!</div>
+                <span>Available sample workbooks showed rigid translation: <strong>temporal &sigma; = 0.0143</strong> for all landmarks. Zero real arm swing or limb flexion.</span>
+              </li>
+              <li class="bullet-item">
+                <div class="bullet-icon" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">!</div>
+                <span><strong>The Circularity Trap:</strong> Writing heuristic rules to score data and then training ML to predict that heuristic proves nothing.</span>
+              </li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 style="color: #34d399; margin-bottom: 12px;">The Physics-Based Solution</h3>
+            <ul class="bullet-list">
+              <li class="bullet-item">
+                <div class="bullet-icon green">&check;</div>
+                <span><strong>Latent Physics Formulation:</strong> True biomechanical qualities (<em>q</em>) drive a 3D articulated kinematic model (Drillis & Contini segment ratios + IK).</span>
+              </li>
+              <li class="bullet-item">
+                <div class="bullet-icon green">&check;</div>
+                <span>Camera projection model with focal perspective, randomized sensor noise, and dropout creates realistic corrupted 2D observations.</span>
+              </li>
+            </ul>
+            <div class="code-box">
+              Latents q &rarr; 3D Kinematics &rarr; Pinhole 2D Projection &rarr; Sensor Noise &rarr; Features
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Signal Processing -->
+    <div class="slide" id="slide-5">
+      <div class="slide-header">
+        <div class="slide-subtitle">Kinematic Normalization</div>
+        <h1 class="slide-title">Signal Processing & Gait Phase Detection</h1>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <h3 style="color: var(--orange); margin-bottom: 14px;">Scale & Distance Invariance</h3>
+            <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.6; margin-bottom: 12px;">
+              As a walker approaches the camera, their vertical scale expands up to 7&times;, dwarfing lateral hip and shoulder sway (magnitude ~0.2 torso lengths).
+            </p>
+            <ul class="bullet-list">
+              <li class="bullet-item">
+                <div class="bullet-icon">1</div>
+                <span><strong>Pelvis Origin & Torso Normalization:</strong> Scores remain identical whether recorded at 3 meters or 8 meters.</span>
+              </li>
+              <li class="bullet-item">
+                <div class="bullet-icon">2</div>
+                <span><strong>Zero-Phase Butterworth High-Pass (0.45 Hz):</strong> Eliminates distance drift without distorting oscillation timing.</span>
+              </li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 style="color: var(--blue); margin-bottom: 14px;">Hilbert Instantaneous Gait Phase</h3>
+            <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.6; margin-bottom: 12px;">
+              Standard peak-picking produces phantom strikes (detecting 27 steps on a 6s clip).
+            </p>
+            <ul class="bullet-list">
+              <li class="bullet-item">
+                <div class="bullet-icon blue">&theta;</div>
+                <span><strong>Hilbert Phase Transform:</strong> Constructs analytic signal <em>z(t) = s(t) + iH[s(t)]</em> for continuous cycle tracking.</span>
+              </li>
+              <li class="bullet-item">
+                <div class="bullet-icon blue">&check;</div>
+                <span>Guarantees exactly one stance event per step cycle with sub-frame cadence accuracy.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Feature Engineering -->
+    <div class="slide" id="slide-6">
+      <div class="slide-header">
+        <div class="slide-subtitle">Kinematic Descriptors</div>
+        <h1 class="slide-title">100+ Engineered Biomechanical Features</h1>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card">
+            <h4 style="color: var(--orange); margin-bottom: 10px;">Postural & Alignment</h4>
+            <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.5;">
+              &bull; Neck tilt & head lateral offset<br>
+              &bull; Absolute shoulder angle variance<br>
+              &bull; Spinal curvature vector<br>
+              &bull; Chest openness index
+            </p>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--blue); margin-bottom: 10px;">Gait Dynamics & Stride</h4>
+            <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.5;">
+              &bull; Stride duration coefficient of variation<br>
+              &bull; Compass-gait hip vertical excursion<br>
+              &bull; Foot clearance & ankle height<br>
+              &bull; Cadence & step cadence stability
+            </p>
+          </div>
+          <div class="card">
+            <h4 style="color: var(--cyan); margin-bottom: 10px;">Symmetry & Coordination</h4>
+            <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.5;">
+              &bull; Left vs. Right arm amplitude ratio<br>
+              &bull; Arm-stride phase delay offset<br>
+              &bull; Lateral hip oscillation symmetry<br>
+              &bull; Torso counter-rotation amplitude
+            </p>
+          </div>
+        </div>
+        <div class="card" style="margin-top: 16px; padding: 16px 24px; background: #0c1017;">
+          <strong style="color: var(--green);">Feature Validation:</strong> Checked via <em>Mutual Information ranking</em> against an empirical noise floor from target permutations (preventing multiple-comparison artefacts).
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Machine Learning Architecture -->
+    <div class="slide" id="slide-7">
+      <div class="slide-header">
+        <div class="slide-subtitle">Modeling Strategy</div>
+        <h1 class="slide-title">12 Specialized Regressors vs. Black-Box DL</h1>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <h3 style="color: var(--orange); margin-bottom: 14px;">Why Tabular ML over End-to-End Deep Learning?</h3>
+            <ul class="bullet-list">
+              <li class="bullet-item">
+                <div class="bullet-icon">1</div>
+                <span><strong>Clinical & Biomechanical Explainability:</strong> Coaches and models need to know the exact physical fault (e.g. <em>shoulder tilt 36.8&deg; vs ideal 2.1&deg;</em>), not an uninterpretable latent vector.</span>
+              </li>
+              <li class="bullet-item">
+                <div class="bullet-icon">2</div>
+                <span><strong>Sample Efficiency:</strong> On 1,500 clips with pre-extracted kinematic signals, tree ensembles outperform heavy neural networks (Grinsztajn et al., 2022).</span>
+              </li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 style="color: var(--blue); margin-bottom: 14px;">Model Selection & Blending</h3>
+            <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.5; margin-bottom: 12px;">
+              Each criterion independently selects its best model based strictly on <strong>out-of-fold cross-validation MAE</strong>:
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="background: #111622; padding: 10px 14px; border-radius: 8px; border-left: 3px solid var(--blue);">
+                <strong>Histogram Gradient Boosting (HGB):</strong> Best for nonlinear interactions (Balance, Head Position, Stride Length).
+              </div>
+              <div style="background: #111622; padding: 10px 14px; border-radius: 8px; border-left: 3px solid var(--purple);">
+                <strong>Ridge + Gradient Boost Blend:</strong> Optimal for smooth, highly correlated human qualities (Confidence, Rhythm, Symmetry).
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: Results (MATCHING USER SLIDE 11 EXACTLY) -->
+    <div class="slide" id="slide-8">
+      <div class="slide-header">
+        <div class="slide-subtitle">R-SQUARED: REPORTED VS INDEPENDENT</div>
+        <h1 class="slide-title">Results</h1>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2" style="margin-bottom: 20px;">
+          <!-- Card 1 -->
+          <div class="card stat-card">
+            <div class="stat-value orange">0.856</div>
+            <div class="stat-label">MAE out of 10, out-of-fold</div>
+          </div>
+          <!-- Card 2 -->
+          <div class="card stat-card">
+            <div class="stat-value blue">0.766</div>
+            <div class="stat-label">R-squared across 12 models</div>
+          </div>
+          <!-- Card 3 -->
+          <div class="card stat-card">
+            <div class="stat-value blue">0.982</div>
+            <div class="stat-label">skill-ranking correlation</div>
+          </div>
+          <!-- Card 4 -->
+          <div class="card stat-card">
+            <div class="stat-value green" style="color: #10b981;">81–90</div>
+            <div class="stat-label">MoCap clinical walk validation</div>
+          </div>
+        </div>
+        <div style="font-size: 1.05rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">
+          199 Python and 18 browser tests passing
+        </div>
+        <div style="font-size: 0.95rem; color: #94a3b8;">
+          Five criteria hold up on independent data. Rhythm falls from 0.53 to 0.17, so weakly identified scores are flagged in the app.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: Per-Criterion Accuracy Breakdown -->
+    <div class="slide" id="slide-9">
+      <div class="slide-header">
+        <div class="slide-subtitle">Granular Benchmark Audit</div>
+        <h1 class="slide-title">12 Criteria Model Performance Breakdown</h1>
+      </div>
+      <div class="slide-body">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Criterion</th>
+                <th>MAE (0–10)</th>
+                <th>R² Score</th>
+                <th>Within &plusmn;1 Pt Accuracy</th>
+                <th>Status / Category</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Foot Placement</strong></td>
+                <td>0.336</td>
+                <td><strong>0.932</strong></td>
+                <td>93.5%</td>
+                <td><span class="badge badge-high">High Accuracy</span></td>
+              </tr>
+              <tr>
+                <td><strong>Confidence</strong></td>
+                <td>0.363</td>
+                <td><strong>0.937</strong></td>
+                <td>92.7%</td>
+                <td><span class="badge badge-high">High Accuracy</span></td>
+              </tr>
+              <tr>
+                <td><strong>Shoulder Alignment</strong></td>
+                <td>0.483</td>
+                <td><strong>0.900</strong></td>
+                <td>87.7%</td>
+                <td><span class="badge badge-high">High Accuracy</span></td>
+              </tr>
+              <tr>
+                <td><strong>Balance</strong></td>
+                <td>0.681</td>
+                <td><strong>0.835</strong></td>
+                <td>80.3%</td>
+                <td><span class="badge badge-high">Strong</span></td>
+              </tr>
+              <tr>
+                <td><strong>Head Position</strong></td>
+                <td>0.628</td>
+                <td><strong>0.844</strong></td>
+                <td>82.5%</td>
+                <td><span class="badge badge-high">Strong</span></td>
+              </tr>
+              <tr>
+                <td><strong>Stage Presence</strong></td>
+                <td>0.627</td>
+                <td><strong>0.848</strong></td>
+                <td>81.3%</td>
+                <td><span class="badge badge-high">Strong</span></td>
+              </tr>
+              <tr>
+                <td><strong>Posture</strong></td>
+                <td>1.061</td>
+                <td>0.691</td>
+                <td>56.7%</td>
+                <td><span class="badge badge-mid">Solid</span></td>
+              </tr>
+              <tr>
+                <td><strong>Rhythm & Dynamic Criteria</strong></td>
+                <td>1.340</td>
+                <td>0.172 &ndash; 0.560</td>
+                <td>43.9%</td>
+                <td><span class="badge badge-flag">Uncertainty Flagged</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: Real-World Audit (The New Scores Story) -->
+    <div class="slide" id="slide-10">
+      <div class="slide-header">
+        <div class="slide-subtitle">Honest Engineering Validation</div>
+        <h1 class="slide-title">What Real Video Revealed: The "New Scores" Story</h1>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <h3 style="color: var(--orange); margin-bottom: 12px;">Real-World Distribution Shift</h3>
+            <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; margin-bottom: 12px;">
+              Testing against real smartphone recordings uncovered differences synthetic models hid:
+            </p>
+            <ul class="bullet-list">
+              <li class="bullet-item">
+                <div class="bullet-icon">!</div>
+                <span><strong>Detector Noise Variance:</strong> MediaPipe jitter on moving mobile cameras differs from idealized synthetic tracks.</span>
+              </li>
+              <li class="bullet-item">
+                <div class="bullet-icon">!</div>
+                <span><strong>MAE Shift (0.902 &rarr; 1.317):</strong> The error metric increased because the evaluation tested genuine out-of-distribution stress.</span>
+              </li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 style="color: #34d399; margin-bottom: 12px;">The Transparent Safeguards</h3>
+            <ul class="bullet-list">
+              <li class="bullet-item">
+                <div class="bullet-icon green">&check;</div>
+                <span><strong>5 Core Criteria Hold Firm:</strong> Foot placement, shoulder line, balance, head position, and confidence preserve production accuracy (R² &ge; 0.84).</span>
+              </li>
+              <li class="bullet-item">
+                <div class="bullet-icon blue">&check;</div>
+                <span><strong>Inference Quality Warnings:</strong> The system automatically flags short clips (&lt;4s), missing step counts, or erratic camera angles instead of pretending to be certain.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: Virtual Coaching Engine -->
+    <div class="slide" id="slide-11">
+      <div class="slide-header">
+        <div class="slide-subtitle">Actionable Prescription</div>
+        <h1 class="slide-title">Explainable Coaching & Drill Recommendation</h1>
+      </div>
+      <div class="slide-body">
+        <div class="card" style="padding: 24px;">
+          <h3 style="margin-bottom: 14px; color: var(--orange);">Prioritizing Highest-ROI Improvements</h3>
+          <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.5; margin-bottom: 16px;">
+            Rather than overwhelming the user with 12 scores, the recommendation engine calculates fault severity and isolates the top 3 highest-impact focus areas:
+          </p>
+          <div class="grid-3">
+            <div style="background: #0f1420; padding: 16px; border-radius: 10px; border-top: 3px solid #f87171;">
+              <h4 style="color: #fff; margin-bottom: 6px;">Focus 1: Shoulder Alignment</h4>
+              <div style="font-size: 0.85rem; color: #f87171; font-weight: 600;">Measured: 36.8&deg; | Ideal: 2.1&deg;</div>
+              <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 8px;"><strong>Prescribed Drill:</strong> "Shoulder Reset" &amp; "Mirror Walk" &bull; 10 min daily collarbone leveling.</p>
+            </div>
+            <div style="background: #0f1420; padding: 16px; border-radius: 10px; border-top: 3px solid var(--orange);">
+              <h4 style="color: #fff; margin-bottom: 6px;">Focus 2: Body Symmetry</h4>
+              <div style="font-size: 0.85rem; color: var(--orange); font-weight: 600;">Measured: 0.42 | Ideal: 0.16</div>
+              <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 8px;"><strong>Prescribed Drill:</strong> "Unilateral Strength" &bull; Single-leg squats &amp; step-ups to balance limb excursions.</p>
+            </div>
+            <div style="background: #0f1420; padding: 16px; border-radius: 10px; border-top: 3px solid var(--blue);">
+              <h4 style="color: #fff; margin-bottom: 6px;">Focus 3: Arm Swing</h4>
+              <div style="font-size: 0.85rem; color: var(--blue); font-weight: 600;">Measured: 0.42 | Ideal: 0.16</div>
+              <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 8px;"><strong>Prescribed Drill:</strong> "Relaxed Pendulum" &bull; Loose shoulder-driven arm oscillations across 10 lengths.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: Web Application & Product Architecture -->
+    <div class="slide" id="slide-12">
+      <div class="slide-header">
+        <div class="slide-subtitle">Full-Stack Implementation</div>
+        <h1 class="slide-title">React UI, FastAPI & SQLite Architecture</h1>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card">
+            <h3 style="color: var(--cyan); margin-bottom: 12px;">React 18 SPA Frontend</h3>
+            <ul class="bullet-list" style="gap: 10px; font-size: 0.95rem;">
+              <li class="bullet-item"><div class="bullet-icon blue">&bull;</div><span>Video upload &amp; direct YouTube URL analysis</span></li>
+              <li class="bullet-item"><div class="bullet-icon blue">&bull;</div><span>Interactive 12-criterion radar &amp; bar visualizations</span></li>
+              <li class="bullet-item"><div class="bullet-icon blue">&bull;</div><span>Historical progress tracker across walk sessions</span></li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 style="color: var(--orange); margin-bottom: 12px;">FastAPI Backend</h3>
+            <ul class="bullet-list" style="gap: 10px; font-size: 0.95rem;">
+              <li class="bullet-item"><div class="bullet-icon">&bull;</div><span>Asynchronous video decoding &amp; keypoint extraction</span></li>
+              <li class="bullet-item"><div class="bullet-icon">&bull;</div><span>REST endpoints matching CLI execution 1:1</span></li>
+              <li class="bullet-item"><div class="bullet-icon">&bull;</div><span>Video annotation rendering (skeleton overlays)</span></li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 style="color: var(--purple); margin-bottom: 12px;">Data & Privacy First</h3>
+            <ul class="bullet-list" style="gap: 10px; font-size: 0.95rem;">
+              <li class="bullet-item"><div class="bullet-icon green">&bull;</div><span>Raw videos can be deleted; stores lightweight keypoints</span></li>
+              <li class="bullet-item"><div class="bullet-icon green">&bull;</div><span>SQLite database with cascade deletes</span></li>
+              <li class="bullet-item"><div class="bullet-icon green">&bull;</div><span>Zero demographic or facial tracking inference</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 13: Live Demo Script -->
+    <div class="slide" id="slide-13">
+      <div class="slide-header">
+        <div class="slide-subtitle">Live Demonstration</div>
+        <h1 class="slide-title">System Demonstration Workflow</h1>
+      </div>
+      <div class="slide-body">
+        <div class="card">
+          <div class="grid-2" style="gap: 20px;">
+            <div>
+              <h4 style="color: var(--orange); margin-bottom: 10px;">Execution Flow (CLI & Web)</h4>
+              <div class="code-box" style="font-size: 0.85rem;">
+                # 1. Run full verification test suite<br>
+                ./run.sh verify<br><br>
+                # 2. Analyze video file<br>
+                ./run.sh analyze walk.mp4<br><br>
+                # 3. Launch React UI + FastAPI<br>
+                ./run.sh web
+              </div>
+            </div>
+            <div>
+              <h4 style="color: var(--blue); margin-bottom: 10px;">What the Evaluator Sees:</h4>
+              <ul class="bullet-list" style="font-size: 0.95rem; gap: 12px;">
+                <li class="bullet-item"><div class="bullet-icon blue">1</div><span>Immediate Overall Score (e.g., <strong>66.7 / 100 &bull; Developing</strong>)</span></li>
+                <li class="bullet-item"><div class="bullet-icon blue">2</div><span>All 12 criteria scores with visual rating badges</span></li>
+                <li class="bullet-item"><div class="bullet-icon blue">3</div><span>Actionable Coaching feedback: Specific faults measured vs. ideal targets</span></li>
+                <li class="bullet-item"><div class="bullet-icon blue">4</div><span>Quality warnings when video length is under 4 seconds</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 14: Future Roadmap -->
+    <div class="slide" id="slide-14">
+      <div class="slide-header">
+        <div class="slide-subtitle">Next Steps</div>
+        <h1 class="slide-title">Future Work & Clinical Extensions</h1>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card">
+            <div class="bullet-icon" style="margin-bottom: 12px; width: 32px; height: 32px; font-size: 1rem;">1</div>
+            <h4 style="color: #fff; margin-bottom: 8px;">Multi-Camera Fusion</h4>
+            <p style="font-size: 0.9rem; color: #94a3b8; line-height: 1.5;">
+              Frontal views foreshorten sagittal stride motion. Adding a synchronous side or 3/4 camera eliminates projection blindspots.
+            </p>
+          </div>
+          <div class="card">
+            <div class="bullet-icon blue" style="margin-bottom: 12px; width: 32px; height: 32px; font-size: 1rem;">2</div>
+            <h4 style="color: #fff; margin-bottom: 8px;">3D Pose Lifting</h4>
+            <p style="font-size: 0.9rem; color: #94a3b8; line-height: 1.5;">
+              Utilizing deep 3D lifting architectures (e.g. MotionBERT) to reconstruct true 3D spatial joint coordinates from monocular 2D video.
+            </p>
+          </div>
+          <div class="card">
+            <div class="bullet-icon green" style="margin-bottom: 12px; width: 32px; height: 32px; font-size: 1rem;">3</div>
+            <h4 style="color: #fff; margin-bottom: 8px;">Real-Time Audio Coaching</h4>
+            <p style="font-size: 0.9rem; color: #94a3b8; line-height: 1.5;">
+              Edge-based webcam inference delivering low-latency audio metronome and posture alerts while the model is actively on the runway.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 15: Conclusion & Q&A -->
+    <div class="slide" id="slide-15">
+      <div class="slide-header">
+        <div class="slide-subtitle">Summary</div>
+        <h1 class="slide-title">Summary & Project Defense</h1>
+      </div>
+      <div class="slide-body">
+        <div class="card" style="text-align: center; padding: 40px; justify-content: center; align-items: center;">
+          <h2 style="font-size: 2.2rem; color: #fff; margin-bottom: 16px;">"We made the scores mean something, and we can prove it."</h2>
+          <p style="max-width: 720px; font-size: 1.15rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 24px;">
+            A rigorous bridge between computer vision, biomechanical signal processing, and machine learning. 12 validated regressors, verified against physical laws and audited against real-world video distribution shift.
+          </p>
+          <div style="display: flex; gap: 24px; justify-content: center;">
+            <div style="text-align: center;">
+              <div style="font-size: 2rem; font-weight: 800; color: var(--orange);">0.856</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">Out-of-Fold MAE</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 2rem; font-weight: 800; color: var(--blue);">0.982</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">Skill-Ranking Correlation</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 2rem; font-weight: 800; color: #10b981;">14 / 14</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">MoCap Walks in Expert Tier</div>
+            </div>
+          </div>
+          <div style="margin-top: 32px; font-size: 1.4rem; font-weight: 700; color: #ffffff;">
+            Thank You &bull; Questions &amp; Discussion
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="footer-left">Runway Performance Analysis and Virtual Coaching | Albin Regi</div>
+    <div class="footer-note" id="slideFooterNote">Slide 1 of 15</div>
+  </footer>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 15;
+
+    function updateSlide() {
+      document.querySelectorAll('.slide').forEach((slide, idx) => {
+        slide.classList.toggle('active', idx + 1 === currentSlide);
+      });
+      document.getElementById('slideNum').innerText = `${currentSlide} / ${totalSlides}`;
+      document.getElementById('slideFooterNote').innerText = `Slide ${currentSlide} of ${totalSlides}`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      }
+    });
+  </script>
+</body>
+</html>
